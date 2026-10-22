@@ -139,8 +139,8 @@ export function GoogleCalendarDashboard({
       {/* 2. Main Body: Sidebar + Active Viewport */}
       <div className="flex-1 flex overflow-hidden relative">
         {/* Desktop Sidebar (inline) */}
-        <div className="hidden lg:block shrink-0 h-full">
-          {isSidebarOpen && (
+        {isSidebarOpen && (
+          <div className="hidden lg:flex shrink-0 h-full bg-[#1e1f20]">
             <CalendarSidebar
               currentDate={currentDate}
               onSelectDate={(d) => setCurrentDate(d)}
@@ -152,8 +152,8 @@ export function GoogleCalendarDashboard({
               availableCount={availableCount}
               bookedCount={bookedCount}
             />
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Mobile / Tablet Drawer (slide-over with backdrop) */}
         {isSidebarOpen && (
@@ -176,7 +176,7 @@ export function GoogleCalendarDashboard({
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-y-auto bg-[#1e1f20]">
                 <CalendarSidebar
                   currentDate={currentDate}
                   onSelectDate={(d) => {
