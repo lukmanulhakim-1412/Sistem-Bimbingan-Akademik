@@ -4,6 +4,7 @@ import { auth, isLecturerEmail } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Role } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { assertRateLimit } from "@/lib/rate-limit";
 
 export interface WhitelistStudentItem {
   id: string;
@@ -131,6 +132,14 @@ export async function addAllowedStudent({
     };
   }
 
+  const rateCheck = await assertRateLimit("addAllowedStudent", {
+    limit: 20,
+    userId: session.user.id,
+  });
+  if (!rateCheck.success) {
+    return { success: false, error: rateCheck.error };
+  }
+
   const cleanEmail = email?.trim().toLowerCase();
 
   if (!cleanEmail || !EMAIL_REGEX.test(cleanEmail)) {
@@ -217,6 +226,14 @@ export async function batchAddAllowedStudents(
       success: false,
       error: "Akses ditolak: Hanya Dosen yang berhak menambah mahasiswa.",
     };
+  }
+
+  const rateCheck = await assertRateLimit("batchAddAllowedStudents", {
+    limit: 10,
+    userId: session.user.id,
+  });
+  if (!rateCheck.success) {
+    return { success: false, error: rateCheck.error };
   }
 
   if (!rawText || !rawText.trim()) {
@@ -317,6 +334,14 @@ export async function deleteAllowedStudent(
       success: false,
       error: "Akses ditolak: Hanya Dosen yang berhak menghapus mahasiswa.",
     };
+  }
+
+  const rateCheck = await assertRateLimit("deleteAllowedStudent", {
+    limit: 20,
+    userId: session.user.id,
+  });
+  if (!rateCheck.success) {
+    return { success: false, error: rateCheck.error };
   }
 
   if (!id) {

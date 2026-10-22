@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { MeetingType, Role } from "@prisma/client";
 import { formatDate, formatTimeRange } from "@/lib/utils";
+import { assertRateLimit } from "@/lib/rate-limit";
 
 const createSlotSchema = z.object({
   date: z.string().min(1, "Tanggal harus dipilih"),
@@ -45,6 +46,14 @@ export async function createSlot(formData: FormData): Promise<ActionResponse> {
       success: false,
       error: "Akses ditolak: Hanya Dosen yang memiliki hak untuk membuat slot jadwal.",
     };
+  }
+
+  const rateCheck = await assertRateLimit("createSlot", {
+    limit: 12,
+    userId: session.user.id,
+  });
+  if (!rateCheck.success) {
+    return { success: false, error: rateCheck.error };
   }
 
   const raw = {
@@ -190,6 +199,14 @@ export async function updateSlotLocation(
     };
   }
 
+  const rateCheck = await assertRateLimit("updateSlotLocation", {
+    limit: 30,
+    userId: session.user.id,
+  });
+  if (!rateCheck.success) {
+    return { success: false, error: rateCheck.error };
+  }
+
   if (!slotId) {
     return {
       success: false,
@@ -238,6 +255,14 @@ export async function bookSlot(slotId: string): Promise<ActionResponse> {
       success: false,
       error: "Silakan login terlebih dahulu untuk membooking jadwal.",
     };
+  }
+
+  const rateCheck = await assertRateLimit("bookSlot", {
+    limit: 10,
+    userId: session.user.id,
+  });
+  if (!rateCheck.success) {
+    return { success: false, error: rateCheck.error };
   }
 
   if (session.user.role !== Role.STUDENT) {
@@ -364,6 +389,14 @@ export async function unassignSlot(slotId: string): Promise<ActionResponse> {
     };
   }
 
+  const rateCheck = await assertRateLimit("unassignSlot", {
+    limit: 10,
+    userId: session.user.id,
+  });
+  if (!rateCheck.success) {
+    return { success: false, error: rateCheck.error };
+  }
+
   if (!slotId) {
     return {
       success: false,
@@ -407,6 +440,14 @@ export async function deleteSlot(
       success: false,
       error: "Akses ditolak: Hanya Dosen yang berhak menghapus slot jadwal.",
     };
+  }
+
+  const rateCheck = await assertRateLimit("deleteSlot", {
+    limit: 30,
+    userId: session.user.id,
+  });
+  if (!rateCheck.success) {
+    return { success: false, error: rateCheck.error };
   }
 
   if (!slotId) {
@@ -474,6 +515,14 @@ export async function toggleSlotBlock(
       success: false,
       error: "Akses ditolak: Hanya Dosen yang berhak mengubah status blokir jadwal.",
     };
+  }
+
+  const rateCheck = await assertRateLimit("toggleSlotBlock", {
+    limit: 30,
+    userId: session.user.id,
+  });
+  if (!rateCheck.success) {
+    return { success: false, error: rateCheck.error };
   }
 
   if (!slotId) {
@@ -547,6 +596,14 @@ export async function updateLecturerNotes(
       success: false,
       error: "Akses ditolak: Hanya Dosen yang memiliki hak untuk menambahkan catatan.",
     };
+  }
+
+  const rateCheck = await assertRateLimit("updateLecturerNotes", {
+    limit: 30,
+    userId: session.user.id,
+  });
+  if (!rateCheck.success) {
+    return { success: false, error: rateCheck.error };
   }
 
   if (!slotId) {

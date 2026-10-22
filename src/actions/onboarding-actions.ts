@@ -4,6 +4,7 @@ import { z } from "zod";
 import { auth, unstable_update } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { assertRateLimit } from "@/lib/rate-limit";
 
 const onboardingSchema = z.object({
   fullName: z
@@ -36,6 +37,14 @@ export async function completeOnboarding(
 
   if (!session?.user?.id) {
     return { error: "Sesi tidak ditemukan. Silakan login kembali." };
+  }
+
+  const rateCheck = await assertRateLimit("completeOnboarding", {
+    limit: 10,
+    userId: session.user.id,
+  });
+  if (!rateCheck.success) {
+    return { error: rateCheck.error };
   }
 
   if (session.user.role !== "STUDENT") {

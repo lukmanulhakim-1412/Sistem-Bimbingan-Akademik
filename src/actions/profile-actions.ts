@@ -4,6 +4,7 @@ import { z } from "zod";
 import { auth, unstable_update } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { assertRateLimit } from "@/lib/rate-limit";
 
 const profileSchema = z.object({
   fullName: z
@@ -39,6 +40,14 @@ export async function updateStudentProfile(
       success: false,
       error: "Sesi tidak ditemukan. Silakan login kembali.",
     };
+  }
+
+  const rateCheck = await assertRateLimit("updateStudentProfile", {
+    limit: 10,
+    userId: session.user.id,
+  });
+  if (!rateCheck.success) {
+    return { success: false, error: rateCheck.error };
   }
 
   const isLecturer = session.user.role === "LECTURER";

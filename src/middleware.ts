@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import { authConfig } from "@/auth.config";
 import { NextResponse } from "next/server";
+import { checkRateLimit, extractClientIp } from "@/lib/rate-limit";
 
 const { auth } = NextAuth(authConfig);
 
@@ -12,6 +13,31 @@ export default auth((req) => {
   const isAuthErrorPage = nextUrl.pathname === "/auth-error";
   const isApiAuthRoute = nextUrl.pathname.startsWith("/api/auth");
   const isApiCronRoute = nextUrl.pathname.startsWith("/api/cron");
+
+  // Rate Limiting for Authentication (10 requests / minute per client IP)
+  if (isApiAuthRoute || isLoginPage) {
+    const clientIp = extractClientIp(req.headers);
+    const rateCheck = checkRateLimit(`auth:${clientIp}`, 10, 60);
+
+    if (!rateCheck.success) {
+      if (isApiAuthRoute) {
+        return NextResponse.json(
+          {
+            error: `Terlalu banyak permintaan autentikasi. Silakan coba lagi setelah ${rateCheck.resetInSeconds} detik.`,
+          },
+          {
+            status: 429,
+            headers: {
+              "Retry-After": String(rateCheck.resetInSeconds),
+            },
+          }
+        );
+      } else {
+        const errorUrl = new URL("/auth-error?error=TooManyRequests", nextUrl.origin);
+        return NextResponse.redirect(errorUrl);
+      }
+    }
+  }
 
   // Allow Auth.js internal API calls, Cron routes, and auth error page
   if (isApiAuthRoute || isApiCronRoute || isAuthErrorPage) {
@@ -34,6 +60,6 @@ export default auth((req) => {
 
 export const config = {
   matcher: [
-    "/((?!api/auth|api/cron|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|svg|ico)$).*)",
+    "/((?!api/cron|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|svg|ico)$).*)",
   ],
 };
