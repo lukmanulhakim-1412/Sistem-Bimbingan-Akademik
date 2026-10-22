@@ -106,7 +106,7 @@ export function StudentDashboard({
                           className="bg-sky-50 text-sky-700 border border-sky-200 text-xs flex items-center gap-1"
                         >
                           <Video className="h-3 w-3" />
-                          <span>Online (Teams)</span>
+                          <span>Online</span>
                         </Badge>
                       ) : (
                         <Badge
@@ -143,7 +143,7 @@ export function StudentDashboard({
                             rel="noopener noreferrer"
                             className="text-blue-600 font-semibold hover:underline flex items-center gap-1.5 break-all"
                           >
-                            <span>Buka Microsoft Teams</span>
+                            <span>Buka Tautan Rapat</span>
                             <ExternalLink className="h-3.5 w-3.5 shrink-0" />
                           </a>
                         ) : (
@@ -154,7 +154,7 @@ export function StudentDashboard({
                       ) : (
                         <p className="italic text-slate-400">
                           {slot.type === MeetingType.ONLINE
-                            ? "Tautan Teams akan diinformasikan oleh Dosen."
+                            ? "Tautan online akan diinformasikan oleh Dosen."
                             : "Ruangan akan diinformasikan oleh Dosen."}
                         </p>
                       )}
@@ -267,7 +267,7 @@ export function StudentDashboard({
                       ) : (
                         <span className="italic text-slate-400">
                           {slot.type === MeetingType.ONLINE
-                            ? "Tautan MS Teams tersedia setelah booking"
+                            ? "Tautan pertemuan online tersedia setelah booking"
                             : "Informasi ruangan tersedia di kampus"}
                         </span>
                       )}

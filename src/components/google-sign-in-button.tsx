@@ -4,8 +4,14 @@ import { useTransition } from "react";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export function GoogleSignInButton({ callbackUrl = "/" }: { callbackUrl?: string }) {
+interface GoogleSignInButtonProps {
+  callbackUrl?: string;
+  className?: string;
+}
+
+export function GoogleSignInButton({ callbackUrl = "/", className }: GoogleSignInButtonProps) {
   const [isPending, startTransition] = useTransition();
 
   const handleSignIn = () => {
@@ -19,12 +25,15 @@ export function GoogleSignInButton({ callbackUrl = "/" }: { callbackUrl?: string
       type="button"
       onClick={handleSignIn}
       disabled={isPending}
-      className="w-full h-12 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium shadow-sm transition-all flex items-center justify-center gap-3 text-base"
+      className={cn(
+        "w-full h-11 bg-white hover:bg-neutral-100 text-neutral-800 font-medium rounded-xl border border-transparent shadow-sm transition-all flex items-center justify-center gap-3 text-sm active:scale-[0.99]",
+        className
+      )}
     >
       {isPending ? (
-        <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+        <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
       ) : (
-        <svg className="h-5 w-5" viewBox="0 0 24 24">
+        <svg className="h-4 w-4" viewBox="0 0 24 24">
           <path
             fill="#4285F4"
             d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"

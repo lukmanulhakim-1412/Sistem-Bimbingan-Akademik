@@ -3,7 +3,7 @@
 import { Role } from "@prisma/client";
 import { MiniCalendar } from "./mini-calendar";
 import { CalendarFilters, UserSessionInfo } from "./types";
-import { Plus, Check, Calendar, CheckCircle2, Clock } from "lucide-react";
+import { Check, Calendar, CheckCircle2 } from "lucide-react";
 
 interface CalendarSidebarProps {
   currentDate: Date;
@@ -31,34 +31,7 @@ export function CalendarSidebar({
   const isLecturer = user.role === Role.LECTURER;
 
   return (
-    <aside className="w-64 shrink-0 bg-[#1e1f20] border-r border-[#3c4043] flex flex-col p-4 gap-6 select-none overflow-y-auto">
-      {/* Create Slot Button for Lecturers / Info Box for Students */}
-      {isLecturer ? (
-        <div>
-          <button
-            type="button"
-            onClick={onOpenCreateModal}
-            className="w-full h-12 px-5 rounded-full bg-[#303134] hover:bg-[#3c4043] border border-[#5f6368] hover:shadow-lg transition-all flex items-center gap-3 text-white font-medium shadow-md text-sm group active:scale-[0.98]"
-          >
-            {/* Google colored plus icon */}
-            <div className="relative flex items-center justify-center">
-              <Plus className="h-6 w-6 text-blue-400 group-hover:rotate-90 transition-transform duration-200" />
-            </div>
-            <span>Buat Slot Baru</span>
-          </button>
-        </div>
-      ) : (
-        <div className="bg-[#2d2f31] border border-[#3c4043] rounded-xl p-3.5 text-xs text-[#c4c7c5] space-y-1.5">
-          <p className="font-semibold text-white flex items-center gap-1.5">
-            <Clock className="h-3.5 w-3.5 text-blue-400" />
-            <span>Portal Mahasiswa</span>
-          </p>
-          <p className="text-[11px] text-[#9aa0a6] leading-relaxed">
-            Pilih slot konsultasi yang berstatus <span className="text-emerald-400 font-medium">Tersedia</span> pada kalender untuk mengajukan bimbingan.
-          </p>
-        </div>
-      )}
-
+    <aside className="w-full h-full min-h-full flex-1 bg-[#1e1f20] flex flex-col p-4 gap-6 select-none overflow-y-auto">
       {/* Mini Calendar Picker */}
       <div className="border-b border-[#3c4043] pb-5">
         <MiniCalendar currentDate={currentDate} onSelectDate={onSelectDate} />
@@ -82,7 +55,7 @@ export function CalendarSidebar({
               className="sr-only"
             />
             <div
-              className={`h-4 w-4 rounded flex items-center justify-center transition-colors border ${
+              className={`h-4 w-4 shrink-0 rounded flex items-center justify-center transition-colors border ${
                 filters.showAvailable
                   ? "bg-emerald-600 border-emerald-500 text-white"
                   : "border-[#5f6368] bg-transparent"
@@ -90,9 +63,9 @@ export function CalendarSidebar({
             >
               {filters.showAvailable && <Check className="h-3 w-3 stroke-[3]" />}
             </div>
-            <div className="flex-1 flex items-center justify-between">
-              <span>Slot Tersedia</span>
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-800/40">
+            <div className="flex-1 flex items-center justify-between gap-3 min-w-0">
+              <span className="whitespace-nowrap">Slot Tersedia</span>
+              <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-800/40 min-w-[20px] text-center ml-2">
                 {availableCount}
               </span>
             </div>
@@ -109,7 +82,7 @@ export function CalendarSidebar({
               className="sr-only"
             />
             <div
-              className={`h-4 w-4 rounded flex items-center justify-center transition-colors border ${
+              className={`h-4 w-4 shrink-0 rounded flex items-center justify-center transition-colors border ${
                 filters.showBooked
                   ? "bg-blue-600 border-blue-500 text-white"
                   : "border-[#5f6368] bg-transparent"
@@ -117,9 +90,9 @@ export function CalendarSidebar({
             >
               {filters.showBooked && <Check className="h-3 w-3 stroke-[3]" />}
             </div>
-            <div className="flex-1 flex items-center justify-between">
-              <span>Slot Sudah Dibooking</span>
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-blue-950/60 text-blue-400 border border-blue-800/40">
+            <div className="flex-1 flex items-center justify-between gap-3 min-w-0">
+              <span className="whitespace-nowrap">Slot Sudah Dibooking</span>
+              <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-950/60 text-blue-400 border border-blue-800/40 min-w-[20px] text-center ml-2">
                 {bookedCount}
               </span>
             </div>
@@ -140,7 +113,7 @@ export function CalendarSidebar({
                 className="sr-only"
               />
               <div
-                className={`h-4 w-4 rounded flex items-center justify-center transition-colors border ${
+                className={`h-4 w-4 shrink-0 rounded flex items-center justify-center transition-colors border ${
                   filters.showMyBookingsOnly
                     ? "bg-indigo-600 border-indigo-500 text-white"
                     : "border-[#5f6368] bg-transparent"

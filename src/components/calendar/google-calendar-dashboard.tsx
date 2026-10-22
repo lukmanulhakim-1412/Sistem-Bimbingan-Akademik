@@ -139,8 +139,8 @@ export function GoogleCalendarDashboard({
       {/* 2. Main Body: Sidebar + Active Viewport */}
       <div className="flex-1 flex overflow-hidden relative">
         {/* Desktop Sidebar (inline) */}
-        <div className="hidden lg:block shrink-0 h-full">
-          {isSidebarOpen && (
+        {isSidebarOpen && (
+          <div className="hidden lg:flex flex-col shrink-0 w-[272px] h-full min-h-full bg-[#1e1f20] border-r border-[#3c4043] overflow-hidden">
             <CalendarSidebar
               currentDate={currentDate}
               onSelectDate={(d) => setCurrentDate(d)}
@@ -152,8 +152,8 @@ export function GoogleCalendarDashboard({
               availableCount={availableCount}
               bookedCount={bookedCount}
             />
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Mobile / Tablet Drawer (slide-over with backdrop) */}
         {isSidebarOpen && (
@@ -268,7 +268,7 @@ export function GoogleCalendarDashboard({
                               {slot.type === MeetingType.ONLINE ? (
                                 <Badge className="bg-sky-950 text-sky-400 border border-sky-800 text-[10px] sm:text-[11px] flex items-center gap-1">
                                   <Video className="h-3 w-3" />
-                                  <span>Online Teams</span>
+                                  <span>Online</span>
                                 </Badge>
                               ) : (
                                 <Badge className="bg-emerald-950 text-emerald-400 border border-emerald-800 text-[10px] sm:text-[11px] flex items-center gap-1">

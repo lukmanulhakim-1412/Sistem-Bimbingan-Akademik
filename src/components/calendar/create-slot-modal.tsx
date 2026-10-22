@@ -182,14 +182,14 @@ export function CreateSlotModal({
                 disabled={isPending}
                 className="bg-[#2d2f31] border-[#5f6368] text-white focus-visible:ring-blue-500"
               >
-                <option value={MeetingType.ONLINE}>Online - Microsoft Teams</option>
+                <option value={MeetingType.ONLINE}>Online</option>
                 <option value={MeetingType.OFFLINE}>Offline - Tatap Muka di Kampus</option>
               </Select>
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="modalLocation" className="text-xs text-[#c4c7c5]">
-                {meetingType === MeetingType.ONLINE ? "Tautan MS Teams" : "Lokasi / Ruangan"}
+                {meetingType === MeetingType.ONLINE ? "Tautan Pertemuan Online" : "Lokasi / Ruangan"}
               </Label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#9aa0a6]">
@@ -206,7 +206,7 @@ export function CreateSlotModal({
                   onChange={(e) => setLocationDetails(e.target.value)}
                   placeholder={
                     meetingType === MeetingType.ONLINE
-                      ? "https://teams.microsoft.com/..."
+                      ? "https://meet.google.com/... atau tautan online"
                       : "Ruang Dosen 304, Gedung A"
                   }
                   disabled={isPending}

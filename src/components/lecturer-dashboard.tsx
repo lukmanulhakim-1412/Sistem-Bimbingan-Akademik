@@ -286,7 +286,7 @@ export function LecturerDashboard({ slots }: LecturerDashboardProps) {
                           {slot.type === MeetingType.ONLINE ? (
                             <Badge className="bg-sky-100 text-sky-800 border border-sky-200 hover:bg-sky-100 font-medium text-xs flex items-center gap-1">
                               <Video className="h-3 w-3 text-sky-600" />
-                              <span>Online (MS Teams)</span>
+                              <span>Online</span>
                             </Badge>
                           ) : (
                             <Badge className="bg-emerald-100 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 font-medium text-xs flex items-center gap-1">
@@ -316,7 +316,7 @@ export function LecturerDashboard({ slots }: LecturerDashboardProps) {
                           <div className="flex items-center gap-1.5 text-xs text-slate-600">
                             {slot.type === MeetingType.ONLINE ? (
                               <>
-                                <span className="font-medium text-slate-700">Link Teams:</span>
+                                <span className="font-medium text-slate-700">Link Online:</span>
                                 {slot.locationDetails.startsWith("http") ? (
                                   <a
                                     href={slot.locationDetails}
