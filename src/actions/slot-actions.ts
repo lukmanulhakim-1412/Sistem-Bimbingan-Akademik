@@ -246,7 +246,7 @@ export async function bookSlot(slotId: string): Promise<ActionResponse> {
     if (new Date(slot.startTime) <= new Date()) {
       return {
         success: false,
-        error: "Tidak dapat membooking jadwal ini karena waktu pelaksanaan konsultasi sudah lewat (kedaluwarsa).",
+        error: "Tidak dapat membooking jadwal ini karena waktu pelaksanaan konsultasi sudah lewat (kadaluarsa).",
       };
     }
 

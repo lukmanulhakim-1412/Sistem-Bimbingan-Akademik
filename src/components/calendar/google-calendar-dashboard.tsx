@@ -69,7 +69,7 @@ export function GoogleCalendarDashboard({
   // KPI Calculations
   const totalSlots = initialSlots.length;
   const availableCount = initialSlots.filter(
-    (s) => s.bookedById === null && !s.isBlocked
+    (s) => s.bookedById === null && !s.isBlocked && new Date(s.startTime) > new Date()
   ).length;
   const bookedCount = initialSlots.filter((s) => s.bookedById !== null).length;
 
@@ -249,6 +249,7 @@ export function GoogleCalendarDashboard({
                     {filteredSlots.map((slot) => {
                       const isBooked = !!slot.bookedById;
                       const isBookedByMe = slot.bookedById === user.id;
+                      const isExpired = !isBooked && new Date(slot.startTime) <= new Date();
 
                       return (
                         <div
@@ -295,6 +296,10 @@ export function GoogleCalendarDashboard({
                               {slot.isBlocked ? (
                                 <Badge className="bg-amber-700/80 text-white text-[10px] sm:text-[11px]">
                                   {isLecturer ? "Diblokir Dosen" : "Tidak Tersedia"}
+                                </Badge>
+                              ) : isExpired ? (
+                                <Badge className="bg-[#282a2d] border border-[#5f6368] text-[#9aa0a6] text-[10px] sm:text-[11px]">
+                                  Kadaluarsa
                                 </Badge>
                               ) : isBooked ? (
                                 <Badge className="bg-blue-600 text-white text-[10px] sm:text-[11px]">

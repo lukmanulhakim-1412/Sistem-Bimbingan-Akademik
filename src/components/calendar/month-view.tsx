@@ -115,12 +115,16 @@ export function MonthView({
                     const isBooked = !!slot.bookedById;
                     const isBookedByMe = slot.bookedById === user.id;
                     const isBlocked = !!slot.isBlocked;
+                    const isExpired = !isBooked && new Date(slot.startTime) <= new Date();
 
                     let pillColor =
                       "bg-emerald-950/80 border border-emerald-600 text-emerald-300";
                     if (isBlocked) {
                       pillColor =
                         "bg-amber-950/80 border border-amber-600 text-amber-300";
+                    } else if (isExpired) {
+                      pillColor =
+                        "bg-[#282a2d] border border-[#5f6368] text-[#9aa0a6]";
                     } else if (isBookedByMe || (isLecturer && isBooked)) {
                       pillColor =
                         "bg-blue-950/80 border border-blue-600 text-blue-300";
@@ -151,6 +155,8 @@ export function MonthView({
                         <span className="truncate">
                           {isBlocked
                             ? slot.blockReason || (isLecturer ? "Diblokir" : "Tidak Tersedia")
+                            : isExpired
+                            ? "Kadaluarsa"
                             : isBooked
                             ? isLecturer
                               ? slot.bookedBy?.fullName || "Booked"

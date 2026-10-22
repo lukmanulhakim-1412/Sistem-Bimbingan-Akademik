@@ -193,9 +193,9 @@ export function SlotDetailModal({
                     {isBookedByMe ? "Jadwal Anda" : "Sudah Dibooking"}
                   </Badge>
                 ) : isPast ? (
-                  <Badge className="bg-[#2d2f31] text-[#9aa0a6] border border-[#3c4043] font-medium text-xs flex items-center gap-1">
+                  <Badge className="bg-[#282a2d] text-[#9aa0a6] border border-[#5f6368] font-medium text-xs flex items-center gap-1">
                     <Clock className="h-3 w-3" />
-                    <span>Telah Lewat</span>
+                    <span>Kadaluarsa</span>
                   </Badge>
                 ) : (
                   <Badge className="bg-emerald-600 text-white font-medium text-xs">
@@ -543,7 +543,7 @@ export function SlotDetailModal({
               ) : isPast && !isBooked ? (
                 <div className="w-full py-2.5 rounded-lg bg-[#282a2d] border border-[#3c4043] text-center font-medium text-[#9aa0a6] text-xs flex items-center justify-center gap-2 cursor-not-allowed">
                   <Clock className="h-4 w-4 text-[#9aa0a6]" />
-                  <span>Waktu Konsultasi Sudah Lewat (Kedaluwarsa)</span>
+                  <span>Waktu Konsultasi Sudah Lewat (Kadaluarsa)</span>
                 </div>
               ) : !isBooked ? (
                 <Button
