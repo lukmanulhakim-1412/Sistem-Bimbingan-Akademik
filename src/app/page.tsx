@@ -55,22 +55,10 @@ export default async function DashboardPage() {
     if (!isLecturer) session.user.isOnboarded = true;
   }
 
-  // 4. Time-bounded slot query & cleanup of unbooked expired slots
+  // 4. Time-bounded read-only slot query (clean & lightweight, expired cleanup handled by background Vercel Cron)
   const now = new Date();
   const pastWindow = new Date(now.getFullYear(), now.getMonth() - 2, 1, 0, 0, 0, 0);
   const futureWindow = new Date(now.getFullYear(), now.getMonth() + 12, 0, 23, 59, 59, 999);
-
-  // Clean up unbooked expired slots from database so they don't clutter the system
-  try {
-    await prisma.slot.deleteMany({
-      where: {
-        bookedById: null,
-        startTime: { lte: now },
-      },
-    });
-  } catch (err) {
-    console.error("Non-blocking cleanup of expired slots:", err);
-  }
 
   const allSlots = await prisma.slot.findMany({
     where: {

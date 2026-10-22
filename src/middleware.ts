@@ -11,9 +11,10 @@ export default auth((req) => {
   const isLoginPage = nextUrl.pathname === "/login";
   const isAuthErrorPage = nextUrl.pathname === "/auth-error";
   const isApiAuthRoute = nextUrl.pathname.startsWith("/api/auth");
+  const isApiCronRoute = nextUrl.pathname.startsWith("/api/cron");
 
-  // Allow Auth.js internal API calls and auth error page
-  if (isApiAuthRoute || isAuthErrorPage) {
+  // Allow Auth.js internal API calls, Cron routes, and auth error page
+  if (isApiAuthRoute || isApiCronRoute || isAuthErrorPage) {
     return NextResponse.next();
   }
 
@@ -33,6 +34,6 @@ export default auth((req) => {
 
 export const config = {
   matcher: [
-    "/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|svg|ico)$).*)",
+    "/((?!api/auth|api/cron|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|svg|ico)$).*)",
   ],
 };
