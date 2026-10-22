@@ -10,6 +10,8 @@ export interface CalendarFilters {
   showAvailable: boolean;
   showBooked: boolean;
   showMyBookingsOnly: boolean;
+  showOnline: boolean;
+  showOffline: boolean;
 }
 
 export interface UserSessionInfo {

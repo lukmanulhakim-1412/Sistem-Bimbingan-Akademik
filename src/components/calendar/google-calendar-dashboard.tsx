@@ -53,6 +53,8 @@ export function GoogleCalendarDashboard({
     showAvailable: true,
     showBooked: true,
     showMyBookingsOnly: false,
+    showOnline: true,
+    showOffline: true,
   });
 
   // Modals State
@@ -72,6 +74,16 @@ export function GoogleCalendarDashboard({
     (s) => s.bookedById === null && !s.isBlocked && new Date(s.startTime).getTime() > Date.now()
   ).length;
   const bookedCount = initialSlots.filter((s) => s.bookedById !== null).length;
+  const onlineCount = initialSlots.filter(
+    (s) =>
+      s.type === MeetingType.ONLINE &&
+      (s.bookedById !== null || new Date(s.startTime).getTime() > Date.now())
+  ).length;
+  const offlineCount = initialSlots.filter(
+    (s) =>
+      s.type === MeetingType.OFFLINE &&
+      (s.bookedById !== null || new Date(s.startTime).getTime() > Date.now())
+  ).length;
 
   // Filtered Slots
   const filteredSlots = useMemo(() => {
@@ -89,6 +101,12 @@ export function GoogleCalendarDashboard({
       if (!filters.showAvailable && isAvailable) return false;
       if (!filters.showBooked && isBooked) return false;
       if (filters.showMyBookingsOnly && !isBookedByMe) return false;
+
+      const isOnline = slot.type === MeetingType.ONLINE;
+      const isOffline = slot.type === MeetingType.OFFLINE;
+
+      if (!filters.showOnline && isOnline) return false;
+      if (!filters.showOffline && isOffline) return false;
 
       return true;
     });
@@ -159,6 +177,8 @@ export function GoogleCalendarDashboard({
               totalSlots={totalSlots}
               availableCount={availableCount}
               bookedCount={bookedCount}
+              onlineCount={onlineCount}
+              offlineCount={offlineCount}
             />
           </div>
         )}
@@ -201,6 +221,8 @@ export function GoogleCalendarDashboard({
                   totalSlots={totalSlots}
                   availableCount={availableCount}
                   bookedCount={bookedCount}
+                  onlineCount={onlineCount}
+                  offlineCount={offlineCount}
                 />
               </div>
             </div>
