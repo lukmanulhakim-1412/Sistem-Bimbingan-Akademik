@@ -83,12 +83,21 @@ export async function createSlot(formData: FormData): Promise<ActionResponse> {
     repeatWeeksCount,
   } = parsed.data;
 
-  // Construct start DateTime
-  const startDateTime = new Date(`${date}T${startTime}`);
+  // Construct start DateTime explicitly in WIB timezone (+07:00)
+  const timeWithSeconds = startTime.length === 5 ? `${startTime}:00` : startTime;
+  const startDateTime = new Date(`${date}T${timeWithSeconds}+07:00`);
   if (isNaN(startDateTime.getTime())) {
     return {
       success: false,
       error: "Format tanggal atau waktu tidak valid.",
+    };
+  }
+
+  // Prevent creating slots in the past
+  if (startDateTime.getTime() <= Date.now()) {
+    return {
+      success: false,
+      error: "Tidak dapat membuat jadwal di waktu yang sudah lewat.",
     };
   }
 

@@ -80,8 +80,8 @@ export function CreateSlotModal({
 
   if (!isOpen) return null;
 
-  // Calculate preview dates
-  const currentSlotDate = date ? new Date(`${date}T00:00:00`) : null;
+  // Calculate preview dates (using WIB timezone)
+  const currentSlotDate = date ? new Date(`${date}T00:00:00+07:00`) : null;
   const dayName = currentSlotDate
     ? new Intl.DateTimeFormat("id-ID", { weekday: "long" }).format(currentSlotDate)
     : "";
