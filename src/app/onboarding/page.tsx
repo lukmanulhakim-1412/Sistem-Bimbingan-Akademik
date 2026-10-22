@@ -32,28 +32,30 @@ export default async function OnboardingPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-b from-slate-50 via-indigo-50/20 to-slate-100 p-4 sm:p-6">
+    <main className="min-h-screen flex flex-col justify-center items-center bg-[#131314] text-[#e3e3e3] p-4 sm:p-6 select-none">
       <div className="w-full max-w-lg">
+        {/* Branding & Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 mb-3">
-            <GraduationCap className="h-8 w-8" />
+          <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[#1e1f20] border border-[#3c4043] text-[#8ab4f8] shadow-lg mb-4">
+            <GraduationCap className="h-7 w-7" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
             Lengkapi Profil Mahasiswa
           </h1>
-          <p className="text-sm text-slate-500 mt-1.5 max-w-sm mx-auto">
+          <p className="text-xs sm:text-sm text-[#9aa0a6] mt-1.5 max-w-sm mx-auto">
             Selamat datang! Masukkan identitas akademik Anda sebelum memulai konsultasi dengan Dosen.
           </p>
         </div>
 
-        <Card className="border-slate-200 shadow-md">
+        {/* Card */}
+        <Card className="bg-[#1e1f20] border-[#3c4043] text-[#e3e3e3] shadow-2xl rounded-2xl">
           <CardHeader className="pb-4">
-            <div className="flex items-center gap-2 text-indigo-600 font-semibold text-sm">
+            <div className="flex items-center gap-2 text-blue-400 font-semibold text-xs sm:text-sm">
               <UserCheck className="h-4 w-4" />
               <span>Verifikasi Data Akademik</span>
             </div>
-            <CardTitle className="text-lg">Formulir Biodata</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-lg text-white">Formulir Biodata</CardTitle>
+            <CardDescription className="text-xs text-[#9aa0a6]">
               Data ini akan ditampilkan kepada Dosen saat Anda melakukan booking jadwal bimbingan.
             </CardDescription>
           </CardHeader>
@@ -62,8 +64,8 @@ export default async function OnboardingPage() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-xs text-slate-400 mt-6">
-          Akun: {session.user.email}
+        <p className="text-center text-xs text-[#5f6368] mt-6">
+          Akun terdaftar: {session.user.email}
         </p>
       </div>
     </main>

@@ -63,15 +63,15 @@ export function OnboardingForm({ initialName }: OnboardingFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       {errorMessage && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
+        <Alert variant="destructive" className="bg-red-950/40 border-red-800 text-red-200">
+          <AlertCircle className="h-4 w-4 text-red-400" />
           <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       )}
 
       {isSuccess && (
-        <Alert variant="success">
-          <CheckCircle2 className="h-4 w-4" />
+        <Alert variant="success" className="bg-emerald-950/40 border-emerald-800 text-emerald-200">
+          <CheckCircle2 className="h-4 w-4 text-emerald-400" />
           <AlertDescription>
             Profil berhasil disimpan! Mengarahkan ke dashboard...
           </AlertDescription>
@@ -79,7 +79,9 @@ export function OnboardingForm({ initialName }: OnboardingFormProps) {
       )}
 
       <div className="space-y-1.5">
-        <Label htmlFor="fullName">Nama Lengkap Mahasiswa</Label>
+        <Label htmlFor="fullName" className="text-sm font-semibold text-white">
+          Nama Lengkap Mahasiswa
+        </Label>
         <Input
           id="fullName"
           name="fullName"
@@ -89,14 +91,17 @@ export function OnboardingForm({ initialName }: OnboardingFormProps) {
           required
           minLength={3}
           disabled={isPending || isSuccess}
+          className="bg-[#2d2f31] border-[#5f6368] text-white placeholder:text-[#80868b] focus-visible:ring-blue-500 h-11"
         />
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-[#9aa0a6]">
           Sesuai dengan nama di Kartu Tanda Mahasiswa (KTM).
         </p>
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="programStudi">Program Studi</Label>
+        <Label htmlFor="programStudi" className="text-sm font-semibold text-white">
+          Program Studi
+        </Label>
         <Input
           id="programStudi"
           name="programStudi"
@@ -105,11 +110,14 @@ export function OnboardingForm({ initialName }: OnboardingFormProps) {
           required
           minLength={2}
           disabled={isPending || isSuccess}
+          className="bg-[#2d2f31] border-[#5f6368] text-white placeholder:text-[#80868b] focus-visible:ring-blue-500 h-11"
         />
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="kelas">Kelas</Label>
+        <Label htmlFor="kelas" className="text-sm font-semibold text-white">
+          Kelas
+        </Label>
         <Input
           id="kelas"
           name="kelas"
@@ -118,8 +126,9 @@ export function OnboardingForm({ initialName }: OnboardingFormProps) {
           required
           minLength={1}
           disabled={isPending || isSuccess}
+          className="bg-[#2d2f31] border-[#5f6368] text-white placeholder:text-[#80868b] focus-visible:ring-blue-500 h-11"
         />
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-[#9aa0a6]">
           Dosen pembimbing akan melihat info ini pada setiap slot yang Anda booking.
         </p>
       </div>
@@ -127,7 +136,7 @@ export function OnboardingForm({ initialName }: OnboardingFormProps) {
       <Button
         type="submit"
         disabled={isPending || isSuccess}
-        className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-medium flex items-center justify-center gap-2"
+        className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-medium flex items-center justify-center gap-2 shadow-md"
       >
         {isPending ? (
           <>
