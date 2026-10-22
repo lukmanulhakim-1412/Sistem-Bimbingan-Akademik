@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { formatDate, formatTimeRange } from "@/lib/utils";
+import { buildGoogleCalendarUrl } from "@/lib/google-calendar";
 import {
   X,
   Clock,
@@ -23,6 +24,7 @@ import {
   ExternalLink,
   UserCheck,
   CalendarCheck,
+  CalendarPlus,
   UserMinus,
   Trash2,
   Loader2,
@@ -94,6 +96,38 @@ export function SlotDetailModal({
   const isOngoing = isBooked && nowMs >= startMs && nowMs < endMs;
   const isCompleted = isBooked && nowMs >= endMs;
   const student = slot.bookedBy;
+
+  // Authorization: Only the lecturer or the student who booked can add to Google Calendar
+  const canAddToGoogleCalendar = isBooked && (isLecturer || isBookedByMe);
+
+  const googleCalendarUrl = canAddToGoogleCalendar
+    ? buildGoogleCalendarUrl({
+        title: isLecturer
+          ? `Bimbingan Akademik: ${student?.fullName || student?.name || "Mahasiswa"}${
+              student?.kelas ? ` - ${student.kelas}` : ""
+            }`
+          : "Bimbingan Akademik Dosen",
+        startTime: slot.startTime,
+        endTime: slot.endTime,
+        location:
+          currentLocation ||
+          slot.locationDetails ||
+          (slot.type === MeetingType.ONLINE
+            ? "Online Meeting"
+            : "Ruang Konsultasi Dosen"),
+        details: isLecturer
+          ? `Sesi Konsultasi Akademik\nMahasiswa: ${
+              student?.fullName || student?.name || "-"
+            }\nProgram Studi: ${student?.programStudi || "-"}\nKelas: ${
+              student?.kelas || "-"
+            }\nEmail: ${student?.email || "-"}\n\nLokasi / Tautan: ${
+              currentLocation || slot.locationDetails || "-"
+            }`
+          : `Sesi Bimbingan Akademik dengan Dosen Pembimbing\n\nLokasi / Tautan Pertemuan: ${
+              currentLocation || slot.locationDetails || "-"
+            }`,
+      })
+    : "";
 
   const handleSaveLocation = () => {
     setErrorMessage(null);
@@ -549,6 +583,33 @@ export function SlotDetailModal({
               </span>
             </div>
           )}
+
+          {/* Add to Google Calendar Action Card (Authorized: Lecturer or Student who booked) */}
+          {canAddToGoogleCalendar && (
+            <div className="pt-1">
+              <a
+                href={googleCalendarUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between p-3 rounded-lg bg-[#202124] hover:bg-[#282a2d] border border-[#3c4043] hover:border-blue-500/60 transition-all group shadow-sm"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="h-8 w-8 rounded-md bg-blue-950/80 border border-blue-700/60 flex items-center justify-center text-blue-400 group-hover:bg-blue-900 group-hover:text-blue-300 transition-colors shrink-0">
+                    <CalendarPlus className="h-4 w-4" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-xs font-semibold text-white group-hover:text-blue-300 transition-colors flex items-center gap-1.5">
+                      <span>Tambahkan ke Google Calendar</span>
+                    </p>
+                    <p className="text-[11px] text-[#9aa0a6]">
+                      Simpan jadwal ini langsung ke kalender akun Google Anda
+                    </p>
+                  </div>
+                </div>
+                <ExternalLink className="h-4 w-4 text-[#9aa0a6] group-hover:text-blue-400 transition-colors shrink-0 ml-2" />
+              </a>
+            </div>
+          )}
         </div>
 
         {/* Modal Footer Actions */}
@@ -655,20 +716,33 @@ export function SlotDetailModal({
                   </div>
 
                   {isBooked && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleUnassign}
-                      disabled={isPending}
-                      className="bg-transparent border-amber-600/60 text-amber-400 hover:bg-amber-950/40 hover:text-amber-300 text-xs flex items-center gap-1.5"
-                    >
-                      {isPending ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        <UserMinus className="h-3.5 w-3.5" />
-                      )}
-                      <span>Batalkan Booking</span>
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <a
+                        href={googleCalendarUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-md border border-blue-600/60 text-blue-400 hover:bg-blue-950/40 hover:text-blue-300 text-xs font-medium transition-colors"
+                        title="Tambahkan ke Google Calendar"
+                      >
+                        <CalendarPlus className="h-3.5 w-3.5" />
+                        <span>Google Calendar</span>
+                        <ExternalLink className="h-3 w-3 opacity-70" />
+                      </a>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleUnassign}
+                        disabled={isPending}
+                        className="bg-transparent border-amber-600/60 text-amber-400 hover:bg-amber-950/40 hover:text-amber-300 text-xs flex items-center gap-1.5"
+                      >
+                        {isPending ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <UserMinus className="h-3.5 w-3.5" />
+                        )}
+                        <span>Batalkan Booking</span>
+                      </Button>
+                    </div>
                   )}
                 </div>
               )}
@@ -718,9 +792,21 @@ export function SlotDetailModal({
                   )}
                 </Button>
               ) : isBookedByMe ? (
-                <div className="w-full py-2 rounded-lg bg-blue-950/60 border border-blue-700/60 text-center font-medium text-blue-300 text-xs flex items-center justify-center gap-2">
-                  <CalendarCheck className="h-4 w-4 text-blue-400" />
-                  <span>Jadwal Ini Telah Anda Daftarkan</span>
+                <div className="w-full space-y-2">
+                  <a
+                    href={googleCalendarUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-2.5 px-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs flex items-center justify-center gap-2 shadow transition-colors"
+                  >
+                    <CalendarPlus className="h-4 w-4" />
+                    <span>Tambahkan ke Google Calendar</span>
+                    <ExternalLink className="h-3.5 w-3.5 opacity-80" />
+                  </a>
+                  <div className="w-full py-1.5 rounded-lg bg-blue-950/40 border border-blue-800/40 text-center font-medium text-blue-300 text-[11px] flex items-center justify-center gap-1.5">
+                    <CalendarCheck className="h-3.5 w-3.5 text-blue-400" />
+                    <span>Jadwal Ini Telah Anda Daftarkan</span>
+                  </div>
                 </div>
               ) : (
                 <div className="w-full py-2 rounded-lg bg-[#2d2f31] border border-[#3c4043] text-center font-medium text-[#9aa0a6] text-xs flex items-center justify-center gap-2 cursor-not-allowed">
