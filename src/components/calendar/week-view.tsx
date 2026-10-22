@@ -8,10 +8,11 @@ import {
   isToday,
   format,
 } from "date-fns";
+import { id } from "date-fns/locale";
 import { SlotWithBookedBy, UserSessionInfo } from "./types";
 import { Role, MeetingType } from "@prisma/client";
 import { formatTime } from "@/lib/utils";
-import { Video, MapPin, Lock, User, Plus } from "lucide-react";
+import { Video, MapPin, Lock, User, Plus, Ban, Repeat, Clock } from "lucide-react";
 
 interface WeekViewProps {
   currentDate: Date;
@@ -81,8 +82,8 @@ export function WeekView({
       <div className="min-w-[700px] md:min-w-0 md:w-full flex flex-col">
         {/* 1. Week Header Row (Sticky at Top) */}
         <div className="flex border-b border-[#3c4043] bg-[#1e1f20] shrink-0 sticky top-0 z-20">
-          {/* Timezone label (Sticky top-left intersection) */}
-          <div className="w-14 sm:w-20 shrink-0 border-r border-[#3c4043] flex flex-col items-center justify-end pb-2 text-[10px] sm:text-xs text-[#9aa0a6] font-medium sticky left-0 z-30 bg-[#1e1f20]">
+          {/* Timezone label (Sticky top-left intersection - centered in box) */}
+          <div className="w-14 sm:w-20 shrink-0 border-r border-[#3c4043] flex items-center justify-center text-[10px] sm:text-xs text-[#9aa0a6] font-medium sticky left-0 z-30 bg-[#1e1f20]">
             <span>GMT+07</span>
           </div>
 
@@ -90,7 +91,7 @@ export function WeekView({
           <div className="flex-1 grid grid-cols-7 divide-x divide-[#3c4043]">
             {weekDays.map((day, idx) => {
               const today = isToday(day);
-              const dayName = format(day, "EEE").toUpperCase();
+              const dayName = format(day, "EEE", { locale: id }).toUpperCase();
               const dayNum = day.getDate();
 
               return (
@@ -135,10 +136,10 @@ export function WeekView({
                 <div
                   key={hour}
                   style={{ height: `${HOUR_HEIGHT}px` }}
-                  className="border-b border-[#2d2f31] relative pr-1.5 sm:pr-2 flex items-start justify-end text-[10px] sm:text-[11px] font-medium"
+                  className="border-b border-[#2d2f31] relative flex items-start text-[10px] sm:text-[11px] font-medium"
                 >
-                  {/* Time label sitting centered on the hour dividing line */}
-                  <span className="absolute -bottom-2.5 right-1.5 sm:right-2 bg-[#18191b] px-0.5 sm:px-1 leading-none text-[#9aa0a6] z-10">
+                  {/* Time label sitting centered on the hour dividing line and horizontally centered */}
+                  <span className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 bg-[#18191b] px-1 sm:px-1.5 leading-none text-[#9aa0a6] z-10 whitespace-nowrap">
                     {displayHour} {period}
                   </span>
                 </div>
@@ -218,10 +219,18 @@ export function WeekView({
 
                     const isBooked = !!slot.bookedById;
                     const isBookedByMe = slot.bookedById === user.id;
+                    const isBlocked = !!slot.isBlocked;
+                    const isExpired = !isBooked && new Date(slot.startTime) <= new Date();
 
                     // Google Calendar Card Theme Styles
                     let cardStyles = "";
-                    if (isBookedByMe) {
+                    if (isBlocked) {
+                      cardStyles =
+                        "bg-[#322314] border-l-4 border-l-amber-500 border border-amber-600/40 text-amber-200 hover:bg-[#3d2c1a]";
+                    } else if (isExpired) {
+                      cardStyles =
+                        "bg-[#282a2d] border-l-4 border-l-[#5f6368] border border-[#3c4043] text-[#9aa0a6] hover:bg-[#303134]";
+                    } else if (isBookedByMe) {
                       cardStyles =
                         "bg-[#1b3a57] border-l-4 border-l-blue-400 border border-blue-500/40 text-blue-100 hover:bg-[#204777]";
                     } else if (isLecturer && isBooked) {
@@ -252,16 +261,31 @@ export function WeekView({
                         <div>
                           {/* Title & Type */}
                           <div className="flex items-center gap-1 font-semibold text-[11px] leading-tight truncate">
-                            {slot.type === MeetingType.ONLINE ? (
+                            {isBlocked ? (
+                              <Ban className="h-3 w-3 shrink-0 text-amber-400" />
+                            ) : isExpired ? (
+                              slot.type === MeetingType.ONLINE ? (
+                                <Video className="h-3 w-3 shrink-0 text-[#9aa0a6]" />
+                              ) : (
+                                <MapPin className="h-3 w-3 shrink-0 text-[#9aa0a6]" />
+                              )
+                            ) : slot.type === MeetingType.ONLINE ? (
                               <Video className="h-3 w-3 shrink-0 text-sky-400" />
                             ) : (
                               <MapPin className="h-3 w-3 shrink-0 text-emerald-400" />
                             )}
                             <span className="truncate">
-                              {slot.type === MeetingType.ONLINE
+                              {isBlocked
+                                ? slot.blockReason || "Diblokir"
+                                : slot.type === MeetingType.ONLINE
                                 ? "Online"
                                 : "Tatap Muka"}
                             </span>
+                            {slot.recurringGroupId && (
+                              <span title="Berulang Mingguan" className="ml-auto flex items-center">
+                                <Repeat className="h-2.5 w-2.5 shrink-0 text-blue-300" />
+                              </span>
+                            )}
                           </div>
 
                           {/* Time Range */}
@@ -272,7 +296,17 @@ export function WeekView({
 
                         {/* Status / Student Info */}
                         <div className="text-[10px] truncate mt-0.5">
-                          {isBooked ? (
+                          {isBlocked ? (
+                            <span className="text-amber-300 font-medium flex items-center gap-1">
+                              <Ban className="h-2.5 w-2.5 shrink-0" />
+                              <span>{isLecturer ? "Diblokir (Dosen)" : "Tidak Tersedia"}</span>
+                            </span>
+                          ) : isExpired ? (
+                            <span className="text-[#9aa0a6] font-medium flex items-center gap-1">
+                              <Clock className="h-2.5 w-2.5 shrink-0" />
+                              <span>Kadaluarsa</span>
+                            </span>
+                          ) : isBooked ? (
                             isLecturer ? (
                               <span className="flex items-center gap-1 font-medium text-blue-200">
                                 <User className="h-2.5 w-2.5 shrink-0" />
