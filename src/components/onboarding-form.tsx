@@ -1,0 +1,151 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { completeOnboarding } from "@/actions/onboarding-actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, ArrowRight, AlertCircle, CheckCircle2 } from "lucide-react";
+
+interface OnboardingFormProps {
+  initialName?: string | null;
+}
+
+export function OnboardingForm({ initialName }: OnboardingFormProps) {
+  const router = useRouter();
+  const { update } = useSession();
+  const [isPending, startTransition] = useTransition();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setErrorMessage(null);
+
+    const formData = new FormData(event.currentTarget);
+    const fullName = formData.get("fullName") as string;
+    const programStudi = formData.get("programStudi") as string;
+    const kelas = formData.get("kelas") as string;
+
+    startTransition(async () => {
+      const result = await completeOnboarding(null, formData);
+
+      if (result.error) {
+        setErrorMessage(result.error);
+        return;
+      }
+
+      if (result.success) {
+        setIsSuccess(true);
+        // Refresh JWT/Session with newly saved database fields
+        try {
+          await update({
+            user: {
+              fullName,
+              programStudi,
+              kelas,
+              isOnboarded: true,
+            },
+          });
+        } catch {
+          // Non-blocking
+        }
+        // Force full refresh to main dashboard
+        router.refresh();
+        window.location.href = "/";
+      }
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {errorMessage && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{errorMessage}</AlertDescription>
+        </Alert>
+      )}
+
+      {isSuccess && (
+        <Alert variant="success">
+          <CheckCircle2 className="h-4 w-4" />
+          <AlertDescription>
+            Profil berhasil disimpan! Mengarahkan ke dashboard...
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <div className="space-y-1.5">
+        <Label htmlFor="fullName">Nama Lengkap Mahasiswa</Label>
+        <Input
+          id="fullName"
+          name="fullName"
+          type="text"
+          placeholder="Contoh: Muhammad Rizky Pratama"
+          defaultValue={initialName || ""}
+          required
+          minLength={3}
+          disabled={isPending || isSuccess}
+        />
+        <p className="text-xs text-slate-400">
+          Sesuai dengan nama di Kartu Tanda Mahasiswa (KTM).
+        </p>
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="programStudi">Program Studi</Label>
+        <Input
+          id="programStudi"
+          name="programStudi"
+          type="text"
+          placeholder="Contoh: Teknik Informatika / Sistem Informasi"
+          required
+          minLength={2}
+          disabled={isPending || isSuccess}
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="kelas">Kelas</Label>
+        <Input
+          id="kelas"
+          name="kelas"
+          type="text"
+          placeholder="Contoh: TI-3A, IF-42-01, Reguler B"
+          required
+          minLength={1}
+          disabled={isPending || isSuccess}
+        />
+        <p className="text-xs text-slate-400">
+          Dosen pembimbing akan melihat info ini pada setiap slot yang Anda booking.
+        </p>
+      </div>
+
+      <Button
+        type="submit"
+        disabled={isPending || isSuccess}
+        className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-medium flex items-center justify-center gap-2"
+      >
+        {isPending ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Menyimpan Profil...</span>
+          </>
+        ) : isSuccess ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Membuka Dashboard...</span>
+          </>
+        ) : (
+          <>
+            <span>Simpan & Lanjutkan ke Dashboard</span>
+            <ArrowRight className="h-4 w-4" />
+          </>
+        )}
+      </Button>
+    </form>
+  );
+}
