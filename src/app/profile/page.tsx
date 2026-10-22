@@ -72,7 +72,7 @@ export default async function ProfilePage() {
           <CardContent className="p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-4">
               {dbUser.image ? (
-                // eslint-disable-next-line @next/next/no-img-element
+                /* eslint-disable-next-line @next/next/no-img-element */
                 <img
                   src={dbUser.image}
                   alt={dbUser.name || "Avatar"}
