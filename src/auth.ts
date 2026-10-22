@@ -52,7 +52,7 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
           return true;
         }
 
-        console.warn(`[AUTH] Akses ditolak untuk ${email}: Belum terdaftar di whitelist.`);
+        console.error(`[AUTH] Akses ditolak untuk ${email}: Belum terdaftar di whitelist.`);
         return false;
       } catch (err) {
         console.error("[AUTH] Gagal memeriksa whitelist:", err);
