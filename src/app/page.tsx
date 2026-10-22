@@ -17,7 +17,20 @@ export default async function DashboardPage() {
 
   const isLecturer = session.user.role === Role.LECTURER;
 
-  // 2. Fetch authoritative user profile from DB
+  // 2. Authoritative check: verify student active whitelist status
+  if (!isLecturer) {
+    const studentEmail = session.user.email?.toLowerCase().trim() || "";
+    const isWhitelisted = await prisma.allowedStudent.findUnique({
+      where: { email: studentEmail },
+      select: { id: true },
+    });
+
+    if (!isWhitelisted) {
+      redirect("/auth-error");
+    }
+  }
+
+  // 3. Fetch authoritative user profile from DB
   const dbUser = await prisma.user.findUnique({
     where: { id: session.user.id },
     select: {
@@ -42,8 +55,18 @@ export default async function DashboardPage() {
     if (!isLecturer) session.user.isOnboarded = true;
   }
 
-  // Fetch all slots
+  // 4. Time-bounded slot query: loads 2 months in past up to 12 months in future for optimal query performance
+  const now = new Date();
+  const pastWindow = new Date(now.getFullYear(), now.getMonth() - 2, 1, 0, 0, 0, 0);
+  const futureWindow = new Date(now.getFullYear(), now.getMonth() + 12, 0, 23, 59, 59, 999);
+
   const allSlots = await prisma.slot.findMany({
+    where: {
+      startTime: {
+        gte: pastWindow,
+        lte: futureWindow,
+      },
+    },
     orderBy: {
       startTime: "asc",
     },
