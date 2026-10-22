@@ -72,18 +72,22 @@ model VerificationToken {
 }
 
 model Slot {
-  id              String      @id @default(cuid())
-  startTime       DateTime
-  endTime         DateTime
-  type            MeetingType
-  locationDetails String?
-  bookedById      String?
-  bookedBy        User?       @relation("BookedSlots", fields: [bookedById], references: [id], onDelete: SetNull)
-  bookedAt        DateTime?
-  createdAt       DateTime    @default(now())
+  id               String       @id @default(cuid())
+  startTime        DateTime
+  endTime          DateTime
+  type             MeetingType  @default(ONLINE)
+  locationDetails  String?
+  isBlocked        Boolean      @default(false)
+  blockReason      String?
+  recurringGroupId String?
+  bookedById       String?
+  bookedBy         User?        @relation("BookedSlots", fields: [bookedById], references: [id], onDelete: SetNull)
+  bookedAt         DateTime?
+  createdAt        DateTime     @default(now())
 
   @@index([startTime])
   @@index([bookedById])
+  @@index([recurringGroupId])
 }
 
 model AllowedStudent {

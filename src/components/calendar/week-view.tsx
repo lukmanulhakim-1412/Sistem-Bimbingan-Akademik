@@ -11,7 +11,7 @@ import {
 import { SlotWithBookedBy, UserSessionInfo } from "./types";
 import { Role, MeetingType } from "@prisma/client";
 import { formatTime } from "@/lib/utils";
-import { Video, MapPin, Lock, User, Plus } from "lucide-react";
+import { Video, MapPin, Lock, User, Plus, Ban, Repeat } from "lucide-react";
 
 interface WeekViewProps {
   currentDate: Date;
@@ -218,10 +218,14 @@ export function WeekView({
 
                     const isBooked = !!slot.bookedById;
                     const isBookedByMe = slot.bookedById === user.id;
+                    const isBlocked = !!slot.isBlocked;
 
                     // Google Calendar Card Theme Styles
                     let cardStyles = "";
-                    if (isBookedByMe) {
+                    if (isBlocked) {
+                      cardStyles =
+                        "bg-[#322314] border-l-4 border-l-amber-500 border border-amber-600/40 text-amber-200 hover:bg-[#3d2c1a]";
+                    } else if (isBookedByMe) {
                       cardStyles =
                         "bg-[#1b3a57] border-l-4 border-l-blue-400 border border-blue-500/40 text-blue-100 hover:bg-[#204777]";
                     } else if (isLecturer && isBooked) {
@@ -252,16 +256,25 @@ export function WeekView({
                         <div>
                           {/* Title & Type */}
                           <div className="flex items-center gap-1 font-semibold text-[11px] leading-tight truncate">
-                            {slot.type === MeetingType.ONLINE ? (
+                            {isBlocked ? (
+                              <Ban className="h-3 w-3 shrink-0 text-amber-400" />
+                            ) : slot.type === MeetingType.ONLINE ? (
                               <Video className="h-3 w-3 shrink-0 text-sky-400" />
                             ) : (
                               <MapPin className="h-3 w-3 shrink-0 text-emerald-400" />
                             )}
                             <span className="truncate">
-                              {slot.type === MeetingType.ONLINE
+                              {isBlocked
+                                ? slot.blockReason || "Diblokir"
+                                : slot.type === MeetingType.ONLINE
                                 ? "Online"
                                 : "Tatap Muka"}
                             </span>
+                            {slot.recurringGroupId && (
+                              <span title="Berulang Mingguan" className="ml-auto flex items-center">
+                                <Repeat className="h-2.5 w-2.5 shrink-0 text-blue-300" />
+                              </span>
+                            )}
                           </div>
 
                           {/* Time Range */}
@@ -272,7 +285,12 @@ export function WeekView({
 
                         {/* Status / Student Info */}
                         <div className="text-[10px] truncate mt-0.5">
-                          {isBooked ? (
+                          {isBlocked ? (
+                            <span className="text-amber-300 font-medium flex items-center gap-1">
+                              <Ban className="h-2.5 w-2.5 shrink-0" />
+                              <span>{isLecturer ? "Diblokir (Dosen)" : "Tidak Tersedia"}</span>
+                            </span>
+                          ) : isBooked ? (
                             isLecturer ? (
                               <span className="flex items-center gap-1 font-medium text-blue-200">
                                 <User className="h-2.5 w-2.5 shrink-0" />

@@ -11,9 +11,12 @@ const createSlotSchema = z.object({
   startTime: z.string().min(1, "Waktu mulai harus dipilih"),
   type: z.nativeEnum(MeetingType, {
     errorMap: () => ({ message: "Jenis pertemuan tidak valid" }),
-  }),
+  }).default(MeetingType.ONLINE),
   locationDetails: z.string().optional(),
+  isBlocked: z.boolean().optional(),
+  blockReason: z.string().optional(),
   repeatWeekly: z.boolean().optional(),
+  repeatWeeksCount: z.number().min(2).max(24).optional().default(12),
 });
 
 export type ActionResponse = {
@@ -40,11 +43,18 @@ export async function createSlot(formData: FormData): Promise<ActionResponse> {
   const raw = {
     date: formData.get("date"),
     startTime: formData.get("startTime"),
-    type: formData.get("type"),
+    type: formData.get("type") || MeetingType.ONLINE,
     locationDetails: formData.get("locationDetails") || undefined,
+    isBlocked:
+      formData.get("isBlocked") === "on" ||
+      formData.get("isBlocked") === "true",
+    blockReason: formData.get("blockReason") || undefined,
     repeatWeekly:
       formData.get("repeatWeekly") === "on" ||
       formData.get("repeatWeekly") === "true",
+    repeatWeeksCount: formData.get("repeatWeeksCount")
+      ? Number(formData.get("repeatWeeksCount"))
+      : 12,
   };
 
   const parsed = createSlotSchema.safeParse(raw);
@@ -55,7 +65,16 @@ export async function createSlot(formData: FormData): Promise<ActionResponse> {
     };
   }
 
-  const { date, startTime, type, locationDetails, repeatWeekly } = parsed.data;
+  const {
+    date,
+    startTime,
+    type,
+    locationDetails,
+    isBlocked,
+    blockReason,
+    repeatWeekly,
+    repeatWeeksCount,
+  } = parsed.data;
 
   // Construct start DateTime
   const startDateTime = new Date(`${date}T${startTime}`);
@@ -66,30 +85,24 @@ export async function createSlot(formData: FormData): Promise<ActionResponse> {
     };
   }
 
-  // End time: exactly 60 minutes after startTime
-  const endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000);
+  const recurringGroupId = repeatWeekly ? crypto.randomUUID() : null;
+  const weeksToGenerate = repeatWeekly ? (repeatWeeksCount || 12) : 1;
+  const slotsToCreate = [];
 
-  const slotsToCreate = [
-    {
-      startTime: startDateTime,
-      endTime: endDateTime,
-      type,
-      locationDetails: locationDetails?.trim() || null,
-    },
-  ];
-
-  if (repeatWeekly) {
-    // Exact same day next week (+7 days in milliseconds)
-    const nextWeekStart = new Date(
-      startDateTime.getTime() + 7 * 24 * 60 * 60 * 1000
+  for (let k = 0; k < weeksToGenerate; k++) {
+    const slotStart = new Date(
+      startDateTime.getTime() + k * 7 * 24 * 60 * 60 * 1000
     );
-    const nextWeekEnd = new Date(nextWeekStart.getTime() + 60 * 60 * 1000);
+    const slotEnd = new Date(slotStart.getTime() + 60 * 60 * 1000);
 
     slotsToCreate.push({
-      startTime: nextWeekStart,
-      endTime: nextWeekEnd,
-      type,
-      locationDetails: locationDetails?.trim() || null,
+      startTime: slotStart,
+      endTime: slotEnd,
+      type: isBlocked ? MeetingType.ONLINE : type,
+      locationDetails: isBlocked ? null : locationDetails?.trim() || null,
+      isBlocked: Boolean(isBlocked),
+      blockReason: isBlocked ? blockReason?.trim() || "Dosen Sibuk / Rapat" : null,
+      recurringGroupId,
     });
   }
 
@@ -102,7 +115,9 @@ export async function createSlot(formData: FormData): Promise<ActionResponse> {
     return {
       success: true,
       message: repeatWeekly
-        ? "2 slot bimbingan berhasil dibuat (minggu ini & minggu depan pada hari yang sama)!"
+        ? `${weeksToGenerate} slot mingguan berhasil dibuat secara otomatis!`
+        : isBlocked
+        ? "Jadwal berhasil diblokir (1 jam)."
         : "Slot bimbingan 1 jam berhasil ditambahkan!",
     };
   } catch (err) {
@@ -201,6 +216,7 @@ export async function bookSlot(slotId: string): Promise<ActionResponse> {
       where: {
         id: slotId,
         bookedById: null, // Atomic lock condition
+        isBlocked: false, // Cannot book blocked slots
         startTime: { gt: new Date() }, // Prevent booking past slots
       },
       data: {
@@ -270,8 +286,13 @@ export async function unassignSlot(slotId: string): Promise<ActionResponse> {
 
 /**
  * Delete a slot permanently (LECTURER ONLY)
+ * If deleteFollowing is true and the slot belongs to a recurring series,
+ * deletes this slot and all following slots in that series.
  */
-export async function deleteSlot(slotId: string): Promise<ActionResponse> {
+export async function deleteSlot(
+  slotId: string,
+  deleteFollowing = false
+): Promise<ActionResponse> {
   const session = await auth();
 
   if (!session?.user?.id || session.user.role !== Role.LECTURER) {
@@ -289,17 +310,110 @@ export async function deleteSlot(slotId: string): Promise<ActionResponse> {
   }
 
   try {
+    const targetSlot = await prisma.slot.findUnique({
+      where: { id: slotId },
+      select: { id: true, recurringGroupId: true, startTime: true },
+    });
+
+    if (!targetSlot) {
+      return {
+        success: false,
+        error: "Slot jadwal tidak ditemukan.",
+      };
+    }
+
+    if (deleteFollowing && targetSlot.recurringGroupId) {
+      const deleted = await prisma.slot.deleteMany({
+        where: {
+          recurringGroupId: targetSlot.recurringGroupId,
+          startTime: { gte: targetSlot.startTime },
+        },
+      });
+
+      revalidatePath("/");
+      return {
+        success: true,
+        message: `${deleted.count} jadwal berseri mingguan berhasil dihapus.`,
+      };
+    }
+
+    // Default: delete single slot
     await prisma.slot.delete({
       where: { id: slotId },
     });
 
     revalidatePath("/");
-    return { success: true };
+    return { success: true, message: "Slot jadwal berhasil dihapus." };
   } catch (err) {
     console.error("Gagal menghapus slot:", err);
     return {
       success: false,
       error: "Gagal menghapus slot jadwal dari sistem.",
+    };
+  }
+}
+
+/**
+ * Toggle block status on a slot (LECTURER ONLY)
+ */
+export async function toggleSlotBlock(
+  slotId: string,
+  blockReason?: string
+): Promise<ActionResponse> {
+  const session = await auth();
+
+  if (!session?.user?.id || session.user.role !== Role.LECTURER) {
+    return {
+      success: false,
+      error: "Akses ditolak: Hanya Dosen yang berhak mengubah status blokir jadwal.",
+    };
+  }
+
+  if (!slotId) {
+    return { success: false, error: "ID Slot jadwal tidak valid." };
+  }
+
+  try {
+    const slot = await prisma.slot.findUnique({
+      where: { id: slotId },
+    });
+
+    if (!slot) {
+      return { success: false, error: "Slot tidak ditemukan." };
+    }
+
+    if (slot.bookedById) {
+      return {
+        success: false,
+        error:
+          "Slot yang sudah dibooking oleh mahasiswa tidak dapat diblokir langsung. Batalkan booking terlebih dahulu.",
+      };
+    }
+
+    const nextBlockedState = !slot.isBlocked;
+
+    await prisma.slot.update({
+      where: { id: slotId },
+      data: {
+        isBlocked: nextBlockedState,
+        blockReason: nextBlockedState
+          ? blockReason?.trim() || "Dosen Sibuk / Rapat"
+          : null,
+      },
+    });
+
+    revalidatePath("/");
+    return {
+      success: true,
+      message: nextBlockedState
+        ? "Jadwal berhasil diblokir."
+        : "Blokir jadwal berhasil dibuka (slot kini tersedia).",
+    };
+  } catch (err) {
+    console.error("Gagal mengubah status blokir:", err);
+    return {
+      success: false,
+      error: "Gagal mengubah status blokir jadwal.",
     };
   }
 }

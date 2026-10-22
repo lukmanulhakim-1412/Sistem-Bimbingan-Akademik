@@ -14,7 +14,7 @@ import {
 import { SlotWithBookedBy, UserSessionInfo } from "./types";
 import { Role, MeetingType } from "@prisma/client";
 import { formatTime } from "@/lib/utils";
-import { Video, MapPin } from "lucide-react";
+import { Video, MapPin, Ban, Repeat } from "lucide-react";
 
 interface MonthViewProps {
   currentDate: Date;
@@ -114,10 +114,14 @@ export function MonthView({
                   {daySlots.slice(0, 3).map((slot) => {
                     const isBooked = !!slot.bookedById;
                     const isBookedByMe = slot.bookedById === user.id;
+                    const isBlocked = !!slot.isBlocked;
 
                     let pillColor =
                       "bg-emerald-950/80 border border-emerald-600 text-emerald-300";
-                    if (isBookedByMe || (isLecturer && isBooked)) {
+                    if (isBlocked) {
+                      pillColor =
+                        "bg-amber-950/80 border border-amber-600 text-amber-300";
+                    } else if (isBookedByMe || (isLecturer && isBooked)) {
                       pillColor =
                         "bg-blue-950/80 border border-blue-600 text-blue-300";
                     } else if (isBooked) {
@@ -134,7 +138,9 @@ export function MonthView({
                         }}
                         className={`text-[10px] sm:text-[11px] rounded px-1.5 py-0.5 truncate cursor-pointer font-medium hover:scale-[1.01] transition-transform flex items-center gap-1 ${pillColor}`}
                       >
-                        {slot.type === MeetingType.ONLINE ? (
+                        {isBlocked ? (
+                          <Ban className="h-2.5 w-2.5 shrink-0 text-amber-400" />
+                        ) : slot.type === MeetingType.ONLINE ? (
                           <Video className="h-2.5 w-2.5 shrink-0" />
                         ) : (
                           <MapPin className="h-2.5 w-2.5 shrink-0" />
@@ -143,7 +149,9 @@ export function MonthView({
                           {formatTime(slot.startTime)}
                         </span>
                         <span className="truncate">
-                          {isBooked
+                          {isBlocked
+                            ? slot.blockReason || (isLecturer ? "Diblokir" : "Tidak Tersedia")
+                            : isBooked
                             ? isLecturer
                               ? slot.bookedBy?.fullName || "Booked"
                               : isBookedByMe
@@ -151,6 +159,9 @@ export function MonthView({
                               : "Terisi"
                             : "Tersedia"}
                         </span>
+                        {slot.recurringGroupId && (
+                          <Repeat className="h-2 w-2 shrink-0 text-blue-300 ml-auto" />
+                        )}
                       </div>
                     );
                   })}

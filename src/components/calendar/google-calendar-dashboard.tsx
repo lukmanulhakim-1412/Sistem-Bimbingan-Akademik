@@ -23,7 +23,7 @@ import { StudentWhitelistModal } from "./student-whitelist-modal";
 import { Role, MeetingType } from "@prisma/client";
 import { formatDate, formatTimeRange } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Video, MapPin, Clock, Inbox, UserCheck, X } from "lucide-react";
+import { Video, MapPin, Clock, Inbox, UserCheck, X, Ban, Repeat } from "lucide-react";
 
 interface GoogleCalendarDashboardProps {
   initialSlots: SlotWithBookedBy[];
@@ -68,14 +68,17 @@ export function GoogleCalendarDashboard({
 
   // KPI Calculations
   const totalSlots = initialSlots.length;
-  const availableCount = initialSlots.filter((s) => s.bookedById === null).length;
+  const availableCount = initialSlots.filter(
+    (s) => s.bookedById === null && !s.isBlocked
+  ).length;
   const bookedCount = initialSlots.filter((s) => s.bookedById !== null).length;
 
   // Filtered Slots
   const filteredSlots = useMemo(() => {
     return initialSlots.filter((slot) => {
       const isBooked = slot.bookedById !== null;
-      const isAvailable = !isBooked;
+      const isBlocked = slot.isBlocked;
+      const isAvailable = !isBooked && !isBlocked;
       const isBookedByMe = slot.bookedById === user.id;
 
       if (!filters.showAvailable && isAvailable) return false;
@@ -264,8 +267,13 @@ export function GoogleCalendarDashboard({
                               </span>
                             </div>
 
-                            <div className="flex items-center gap-2 text-xs">
-                              {slot.type === MeetingType.ONLINE ? (
+                            <div className="flex items-center gap-2 text-xs flex-wrap">
+                              {slot.isBlocked ? (
+                                <Badge className="bg-amber-950 text-amber-400 border border-amber-800 text-[10px] sm:text-[11px] flex items-center gap-1">
+                                  <Ban className="h-3 w-3" />
+                                  <span>{slot.blockReason || "Diblokir"}</span>
+                                </Badge>
+                              ) : slot.type === MeetingType.ONLINE ? (
                                 <Badge className="bg-sky-950 text-sky-400 border border-sky-800 text-[10px] sm:text-[11px] flex items-center gap-1">
                                   <Video className="h-3 w-3" />
                                   <span>Online</span>
@@ -277,7 +285,18 @@ export function GoogleCalendarDashboard({
                                 </Badge>
                               )}
 
-                              {isBooked ? (
+                              {slot.recurringGroupId && (
+                                <Badge className="bg-blue-950 text-blue-300 border border-blue-800 text-[10px] sm:text-[11px] flex items-center gap-1">
+                                  <Repeat className="h-3 w-3" />
+                                  <span>Mingguan</span>
+                                </Badge>
+                              )}
+
+                              {slot.isBlocked ? (
+                                <Badge className="bg-amber-700/80 text-white text-[10px] sm:text-[11px]">
+                                  {isLecturer ? "Diblokir Dosen" : "Tidak Tersedia"}
+                                </Badge>
+                              ) : isBooked ? (
                                 <Badge className="bg-blue-600 text-white text-[10px] sm:text-[11px]">
                                   {isBookedByMe
                                     ? "Jadwal Anda"
