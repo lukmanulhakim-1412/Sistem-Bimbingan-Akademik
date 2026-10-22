@@ -264,6 +264,7 @@ export function CreateSlotModal({
                     type="text"
                     value={locationDetails}
                     onChange={(e) => setLocationDetails(e.target.value)}
+                    maxLength={300}
                     placeholder={
                       meetingType === MeetingType.ONLINE
                         ? "https://meet.google.com/... atau tautan online"
@@ -286,6 +287,7 @@ export function CreateSlotModal({
                 type="text"
                 value={blockReason}
                 onChange={(e) => setBlockReason(e.target.value)}
+                maxLength={150}
                 placeholder="Contoh: Rapat Jurusan, Mengajar Kuliah, Urusan Dinas"
                 disabled={isPending}
                 className="bg-[#2d2f31] border-[#5f6368] text-white focus-visible:ring-amber-500 text-xs"

@@ -345,6 +345,7 @@ export function SlotDetailModal({
                     type="text"
                     value={locationInput}
                     onChange={(e) => setLocationInput(e.target.value)}
+                    maxLength={300}
                     placeholder={
                       slot.type === MeetingType.ONLINE
                         ? "https://meet.google.com/... atau tautan online"

@@ -90,6 +90,7 @@ export function OnboardingForm({ initialName }: OnboardingFormProps) {
           defaultValue={initialName || ""}
           required
           minLength={3}
+          maxLength={100}
           disabled={isPending || isSuccess}
           className="bg-[#2d2f31] border-[#5f6368] text-white placeholder:text-[#80868b] focus-visible:ring-blue-500 h-11"
         />
@@ -109,6 +110,7 @@ export function OnboardingForm({ initialName }: OnboardingFormProps) {
           placeholder="Contoh: Teknik Informatika / Sistem Informasi"
           required
           minLength={2}
+          maxLength={60}
           disabled={isPending || isSuccess}
           className="bg-[#2d2f31] border-[#5f6368] text-white placeholder:text-[#80868b] focus-visible:ring-blue-500 h-11"
         />
@@ -125,6 +127,7 @@ export function OnboardingForm({ initialName }: OnboardingFormProps) {
           placeholder="Contoh: TI-3A, IF-42-01, Reguler B"
           required
           minLength={1}
+          maxLength={30}
           disabled={isPending || isSuccess}
           className="bg-[#2d2f31] border-[#5f6368] text-white placeholder:text-[#80868b] focus-visible:ring-blue-500 h-11"
         />

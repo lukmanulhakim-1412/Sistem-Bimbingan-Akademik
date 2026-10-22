@@ -163,6 +163,7 @@ export function CreateSlotForm() {
                   name="locationDetails"
                   type="text"
                   className="pl-9"
+                  maxLength={300}
                   placeholder={
                     meetingType === MeetingType.ONLINE
                       ? "https://teams.microsoft.com/l/meetup-join/..."

@@ -140,6 +140,29 @@ export async function addAllowedStudent({
     };
   }
 
+  if (cleanEmail.length > 100) {
+    return {
+      success: false,
+      error: "Alamat email maksimal 100 karakter.",
+    };
+  }
+
+  const cleanName = name?.trim() || null;
+  if (cleanName && cleanName.length > 100) {
+    return {
+      success: false,
+      error: "Nama mahasiswa maksimal 100 karakter.",
+    };
+  }
+
+  const cleanNotes = notes?.trim() || null;
+  if (cleanNotes && cleanNotes.length > 150) {
+    return {
+      success: false,
+      error: "Catatan maksimal 150 karakter.",
+    };
+  }
+
   if (isLecturerEmail(cleanEmail)) {
     return {
       success: false,
@@ -162,8 +185,8 @@ export async function addAllowedStudent({
     await prisma.allowedStudent.create({
       data: {
         email: cleanEmail,
-        name: name?.trim() || null,
-        notes: notes?.trim() || null,
+        name: cleanName,
+        notes: cleanNotes,
       },
     });
 
@@ -203,15 +226,22 @@ export async function batchAddAllowedStudents(
     };
   }
 
+  if (rawText.length > 500) {
+    return {
+      success: false,
+      error: "Teks daftar email maksimal 500 karakter.",
+    };
+  }
+
   // Split by newlines, commas, semicolons, tabs, spaces
   const rawTokens = rawText
     .split(/[\r\n,;\t\s]+/)
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
 
-  // Filter valid email formats & remove duplicates in the input
-  const uniqueCandidateEmails = Array.from(new Set(rawTokens)).filter((e) =>
-    EMAIL_REGEX.test(e)
+  // Filter valid email formats & remove duplicates in the input (max 100 chars per email)
+  const uniqueCandidateEmails = Array.from(new Set(rawTokens)).filter(
+    (e) => e.length <= 100 && EMAIL_REGEX.test(e)
   );
 
   if (uniqueCandidateEmails.length === 0) {

@@ -293,6 +293,7 @@ export function StudentWhitelistModal({
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    maxLength={100}
                     placeholder="Cari email, nama, prodi, atau kelas..."
                     className="pl-9 h-9 text-xs bg-[#282a2d] border-[#3c4043] text-white focus-visible:ring-emerald-500"
                   />
@@ -491,6 +492,7 @@ export function StudentWhitelistModal({
                       required
                       value={singleEmail}
                       onChange={(e) => setSingleEmail(e.target.value)}
+                      maxLength={100}
                       placeholder="contoh: budi.santoso@gmail.com"
                       className="h-10 text-xs bg-[#282a2d] border-[#3c4043] text-white focus-visible:ring-emerald-500"
                       disabled={isPending}
@@ -509,6 +511,7 @@ export function StudentWhitelistModal({
                         type="text"
                         value={singleName}
                         onChange={(e) => setSingleName(e.target.value)}
+                        maxLength={100}
                         placeholder="Budi Santoso"
                         className="h-10 text-xs bg-[#282a2d] border-[#3c4043] text-white focus-visible:ring-emerald-500"
                         disabled={isPending}
@@ -522,6 +525,7 @@ export function StudentWhitelistModal({
                         type="text"
                         value={singleNotes}
                         onChange={(e) => setSingleNotes(e.target.value)}
+                        maxLength={150}
                         placeholder="TI-2024 / Bimbingan TA"
                         className="h-10 text-xs bg-[#282a2d] border-[#3c4043] text-white focus-visible:ring-emerald-500"
                         disabled={isPending}
@@ -582,10 +586,17 @@ export function StudentWhitelistModal({
                       required
                       value={bulkText}
                       onChange={(e) => setBulkText(e.target.value)}
+                      maxLength={500}
                       placeholder={`mhs1@gmail.com\nmhs2@student.univ.ac.id, mhs3@gmail.com\nmhs4@gmail.com`}
-                      className="w-full rounded-lg bg-[#282a2d] border border-[#3c4043] p-3 text-xs text-white placeholder:text-[#5f6368] focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono leading-relaxed"
+                      className="w-full rounded-lg bg-[#282a2d] border border-[#3c4043] p-3 text-xs text-white placeholder:text-[#5f6368] focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono leading-relaxed resize-none"
                       disabled={isPending}
                     />
+                    <div className="flex justify-between items-center text-[11px] px-0.5 text-[#9aa0a6]">
+                      <span>Maksimal 500 karakter</span>
+                      <span className={bulkText.length >= 480 ? "text-amber-400 font-medium" : ""}>
+                        {bulkText.length} / 500
+                      </span>
+                    </div>
                   </div>
 
                   <div className="pt-2 flex items-center justify-end gap-2.5">

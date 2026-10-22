@@ -480,6 +480,13 @@ export async function toggleSlotBlock(
     return { success: false, error: "ID Slot jadwal tidak valid." };
   }
 
+  if (blockReason && blockReason.trim().length > 150) {
+    return {
+      success: false,
+      error: "Alasan blokir maksimal 150 karakter.",
+    };
+  }
+
   try {
     const slot = await prisma.slot.findUnique({
       where: { id: slotId },

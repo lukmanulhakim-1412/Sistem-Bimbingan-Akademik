@@ -92,6 +92,7 @@ export function ProfileForm({ initialData, isLecturer = false }: ProfileFormProp
           }
           required
           minLength={3}
+          maxLength={100}
           disabled={isPending}
           className="bg-[#2d2f31] border-[#5f6368] text-white focus-visible:ring-blue-500 h-11"
         />
@@ -118,6 +119,7 @@ export function ProfileForm({ initialData, isLecturer = false }: ProfileFormProp
           }
           required={!isLecturer}
           minLength={isLecturer ? undefined : 2}
+          maxLength={60}
           disabled={isPending}
           className="bg-[#2d2f31] border-[#5f6368] text-white focus-visible:ring-blue-500 h-11"
         />
@@ -136,6 +138,7 @@ export function ProfileForm({ initialData, isLecturer = false }: ProfileFormProp
             placeholder="Contoh: TI-3A, IF-42-01"
             required
             minLength={1}
+            maxLength={30}
             disabled={isPending}
             className="bg-[#2d2f31] border-[#5f6368] text-white focus-visible:ring-blue-500 h-11"
           />

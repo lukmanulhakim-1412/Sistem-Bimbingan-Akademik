@@ -9,15 +9,18 @@ const onboardingSchema = z.object({
   fullName: z
     .string({ required_error: "Nama Lengkap wajib diisi" })
     .trim()
-    .min(3, "Nama Lengkap minimal 3 karakter"),
+    .min(3, "Nama Lengkap minimal 3 karakter")
+    .max(100, "Nama Lengkap maksimal 100 karakter"),
   programStudi: z
     .string({ required_error: "Program Studi wajib diisi" })
     .trim()
-    .min(2, "Program Studi harus diisi"),
+    .min(2, "Program Studi harus diisi")
+    .max(60, "Program Studi maksimal 60 karakter"),
   kelas: z
     .string({ required_error: "Kelas wajib diisi" })
     .trim()
-    .min(1, "Kelas harus diisi (contoh: TI-3A, IF-01)"),
+    .min(1, "Kelas harus diisi (contoh: TI-3A, IF-01)")
+    .max(30, "Kelas maksimal 30 karakter"),
 });
 
 export type OnboardingState = {
