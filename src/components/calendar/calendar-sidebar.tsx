@@ -3,7 +3,7 @@
 import { Role } from "@prisma/client";
 import { MiniCalendar } from "./mini-calendar";
 import { CalendarFilters, UserSessionInfo } from "./types";
-import { Check, Calendar, CheckCircle2, Video, MapPin } from "lucide-react";
+import { Check, Calendar, CheckCircle2, Video, MapPin, UserCheck, User } from "lucide-react";
 
 interface CalendarSidebarProps {
   currentDate: Date;
@@ -72,7 +72,10 @@ export function CalendarSidebar({
                 {filters.showAvailable && <Check className="h-3 w-3 stroke-[3]" />}
               </div>
               <div className="flex-1 flex items-center justify-between gap-3 min-w-0">
-                <span className="whitespace-nowrap">Slot Tersedia</span>
+                <span className="flex items-center gap-1.5 whitespace-nowrap">
+                  <Calendar className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                  <span>Tersedia</span>
+                </span>
                 <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-800/40 min-w-[20px] text-center ml-2">
                   {availableCount}
                 </span>
@@ -99,7 +102,10 @@ export function CalendarSidebar({
                 {filters.showBooked && <Check className="h-3 w-3 stroke-[3]" />}
               </div>
               <div className="flex-1 flex items-center justify-between gap-3 min-w-0">
-                <span className="whitespace-nowrap">Slot Sudah Dibooking</span>
+                <span className="flex items-center gap-1.5 whitespace-nowrap">
+                  <UserCheck className="h-3.5 w-3.5 text-blue-400 shrink-0" />
+                  <span>Sudah Dibooking</span>
+                </span>
                 <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-950/60 text-blue-400 border border-blue-800/40 min-w-[20px] text-center ml-2">
                   {bookedCount}
                 </span>
@@ -162,7 +168,10 @@ export function CalendarSidebar({
                   )}
                 </div>
                 <div className="flex-1 flex items-center justify-between">
-                  <span>Hanya Jadwal Saya</span>
+                  <span className="flex items-center gap-1.5 whitespace-nowrap">
+                    <User className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
+                    <span>Hanya Jadwal Saya</span>
+                  </span>
                 </div>
               </label>
             )}
@@ -250,7 +259,7 @@ export function CalendarSidebar({
           <span className="font-semibold text-emerald-300">{availableCount}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-blue-400">Terisi (Aktif):</span>
+          <span className="text-blue-400">Sudah Dibooking:</span>
           <span className="font-semibold text-blue-300">{bookedCount}</span>
         </div>
         <div className="flex items-center justify-between">
