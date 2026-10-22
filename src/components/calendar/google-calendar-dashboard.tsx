@@ -148,9 +148,6 @@ export function GoogleCalendarDashboard({
               onFilterChange={setFilters}
               user={user}
               onOpenCreateModal={() => handleOpenCreateModal()}
-              onOpenWhitelistModal={
-                isLecturer ? () => setIsWhitelistModalOpen(true) : undefined
-              }
               totalSlots={totalSlots}
               availableCount={availableCount}
               bookedCount={bookedCount}
@@ -193,14 +190,6 @@ export function GoogleCalendarDashboard({
                     handleOpenCreateModal();
                     setIsSidebarOpen(false);
                   }}
-                  onOpenWhitelistModal={
-                    isLecturer
-                      ? () => {
-                          setIsWhitelistModalOpen(true);
-                          setIsSidebarOpen(false);
-                        }
-                      : undefined
-                  }
                   totalSlots={totalSlots}
                   availableCount={availableCount}
                   bookedCount={bookedCount}
