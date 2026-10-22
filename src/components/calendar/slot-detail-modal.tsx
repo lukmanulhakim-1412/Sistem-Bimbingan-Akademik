@@ -1,11 +1,17 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { SlotWithBookedBy, UserSessionInfo } from "./types";
 import { Role, MeetingType } from "@prisma/client";
-import { bookSlot, unassignSlot, deleteSlot } from "@/actions/slot-actions";
+import {
+  bookSlot,
+  unassignSlot,
+  deleteSlot,
+  updateSlotLocation,
+} from "@/actions/slot-actions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { formatDate, formatTimeRange } from "@/lib/utils";
 import {
   X,
@@ -21,6 +27,8 @@ import {
   AlertCircle,
   Info,
   Lock,
+  Edit2,
+  Check,
 } from "lucide-react";
 
 interface SlotDetailModalProps {
@@ -41,13 +49,44 @@ export function SlotDetailModal({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
+  // Editable location state for Lecturer
+  const [isEditingLocation, setIsEditingLocation] = useState(false);
+  const [locationInput, setLocationInput] = useState("");
+  const [currentLocation, setCurrentLocation] = useState("");
+
+  useEffect(() => {
+    if (slot) {
+      setLocationInput(slot.locationDetails || "");
+      setCurrentLocation(slot.locationDetails || "");
+      setIsEditingLocation(false);
+      setErrorMessage(null);
+      setSuccessMessage(null);
+      setConfirmDelete(false);
+    }
+  }, [slot]);
+
   if (!isOpen || !slot) return null;
 
   const isLecturer = user.role === Role.LECTURER;
   const isBooked = !!slot.bookedById;
   const isBookedByMe = slot.bookedById === user.id;
-  const isBookedByOther = isBooked && !isBookedByMe;
   const student = slot.bookedBy;
+
+  const handleSaveLocation = () => {
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    startTransition(async () => {
+      const res = await updateSlotLocation(slot.id, locationInput);
+      if (!res.success) {
+        setErrorMessage(res.error || "Gagal mengubah tautan pertemuan.");
+      } else {
+        setCurrentLocation(locationInput);
+        setSuccessMessage(res.message || "Tautan pertemuan berhasil disimpan!");
+        setIsEditingLocation(false);
+      }
+    });
+  };
 
   const handleBooking = () => {
     setErrorMessage(null);
@@ -175,33 +214,101 @@ export function SlotDetailModal({
             </div>
           </div>
 
-          {/* Location / Meeting link */}
-          <div className="p-3 rounded-lg bg-[#282a2d] border border-[#3c4043] space-y-1">
-            <span className="text-[11px] font-semibold text-[#9aa0a6] uppercase tracking-wider block">
-              {slot.type === MeetingType.ONLINE ? "Tautan Pertemuan:" : "Lokasi Ruangan:"}
-            </span>
-            {slot.locationDetails ? (
-              slot.type === MeetingType.ONLINE && slot.locationDetails.startsWith("http") ? (
-                <a
-                  href={slot.locationDetails}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-400 hover:underline flex items-center gap-1.5 break-all font-medium"
+          {/* Location / Meeting link (Editable by Lecturer) */}
+          <div className="p-3.5 rounded-lg bg-[#282a2d] border border-[#3c4043] space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-[#9aa0a6] uppercase tracking-wider block">
+                {slot.type === MeetingType.ONLINE ? "Tautan Pertemuan:" : "Lokasi Ruangan:"}
+              </span>
+
+              {/* Edit Button for Lecturer */}
+              {isLecturer && !isEditingLocation && (
+                <button
+                  type="button"
+                  onClick={() => setIsEditingLocation(true)}
+                  className="text-blue-400 hover:text-blue-300 text-xs font-semibold flex items-center gap-1 hover:underline transition-colors"
                 >
-                  <span className="truncate">{slot.locationDetails}</span>
-                  <ExternalLink className="h-3.5 w-3.5 shrink-0" />
-                </a>
-              ) : (
-                <p className="font-semibold text-white break-words">
-                  {slot.locationDetails}
-                </p>
-              )
+                  <Edit2 className="h-3 w-3" />
+                  <span>Ubah Tautan</span>
+                </button>
+              )}
+            </div>
+
+            {/* Inline Editor for Lecturer */}
+            {isLecturer && isEditingLocation ? (
+              <div className="space-y-2 pt-1">
+                <Input
+                  type="text"
+                  value={locationInput}
+                  onChange={(e) => setLocationInput(e.target.value)}
+                  placeholder={
+                    slot.type === MeetingType.ONLINE
+                      ? "https://teams.microsoft.com/l/meetup-join/..."
+                      : "Ruang Dosen 304, Gedung Menara Ilmiah Lt. 3"
+                  }
+                  className="h-9 text-xs bg-[#1e1f20] border-[#5f6368] text-white focus-visible:ring-blue-500"
+                  disabled={isPending}
+                  autoFocus
+                />
+                <div className="flex items-center justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setLocationInput(currentLocation);
+                      setIsEditingLocation(false);
+                    }}
+                    disabled={isPending}
+                    className="h-7 text-xs px-2.5 text-[#9aa0a6] hover:text-white"
+                  >
+                    Batal
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={handleSaveLocation}
+                    disabled={isPending}
+                    className="h-7 text-xs px-3 bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1 font-medium"
+                  >
+                    {isPending ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <Check className="h-3 w-3" />
+                    )}
+                    <span>Simpan Tautan</span>
+                  </Button>
+                </div>
+              </div>
             ) : (
-              <p className="italic text-[#9aa0a6]">
-                {slot.type === MeetingType.ONLINE
-                  ? "Tautan Microsoft Teams akan diinfokan oleh Dosen."
-                  : "Ruangan tatap muka akan diinfokan di kampus."}
-              </p>
+              /* View Mode */
+              <div>
+                {currentLocation ? (
+                  slot.type === MeetingType.ONLINE && currentLocation.startsWith("http") ? (
+                    <a
+                      href={currentLocation}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-400 hover:underline flex items-center gap-1.5 break-all font-medium text-xs mt-0.5"
+                    >
+                      <span className="truncate">{currentLocation}</span>
+                      <ExternalLink className="h-3.5 w-3.5 shrink-0" />
+                    </a>
+                  ) : (
+                    <p className="font-semibold text-white break-words mt-0.5">
+                      {currentLocation}
+                    </p>
+                  )
+                ) : (
+                  <p className="italic text-[#9aa0a6] mt-0.5">
+                    {slot.type === MeetingType.ONLINE
+                      ? isLecturer
+                        ? "Belum ada tautan. Klik 'Ubah Tautan' untuk menambahkan tautan MS Teams."
+                        : "Tautan Microsoft Teams akan diinfokan oleh Dosen."
+                      : "Ruangan tatap muka akan diinfokan di kampus."}
+                  </p>
+                )}
+              </div>
             )}
           </div>
 
