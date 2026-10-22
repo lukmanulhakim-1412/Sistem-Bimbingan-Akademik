@@ -9,10 +9,11 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth;
 
   const isLoginPage = nextUrl.pathname === "/login";
+  const isAuthErrorPage = nextUrl.pathname === "/auth-error";
   const isApiAuthRoute = nextUrl.pathname.startsWith("/api/auth");
 
-  // Allow Auth.js internal API calls
-  if (isApiAuthRoute) {
+  // Allow Auth.js internal API calls and auth error page
+  if (isApiAuthRoute || isAuthErrorPage) {
     return NextResponse.next();
   }
 
