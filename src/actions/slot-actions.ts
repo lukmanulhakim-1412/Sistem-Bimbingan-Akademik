@@ -210,13 +210,54 @@ export async function bookSlot(slotId: string): Promise<ActionResponse> {
   }
 
   try {
-    // CRITICAL ATOMIC CONDITIONAL UPDATE:
+    // 1. Check existing slot status first to provide precise, friendly feedback
+    const slot = await prisma.slot.findUnique({
+      where: { id: slotId },
+      select: {
+        id: true,
+        startTime: true,
+        bookedById: true,
+        isBlocked: true,
+      },
+    });
+
+    if (!slot) {
+      return {
+        success: false,
+        error: "Slot jadwal tidak ditemukan atau telah dihapus.",
+      };
+    }
+
+    if (slot.isBlocked) {
+      return {
+        success: false,
+        error: "Maaf, slot jadwal ini sedang diblokir oleh Dosen dan tidak dapat dipesan.",
+      };
+    }
+
+    if (slot.bookedById) {
+      return {
+        success: false,
+        error: "Maaf, slot jadwal ini baru saja dibooking oleh mahasiswa lain.",
+      };
+    }
+
+    // Prevent booking past slots with a friendly and clear error message
+    if (new Date(slot.startTime) <= new Date()) {
+      return {
+        success: false,
+        error: "Tidak dapat membooking jadwal ini karena waktu pelaksanaan konsultasi sudah lewat (kedaluwarsa).",
+      };
+    }
+
+    // 2. CRITICAL ATOMIC CONDITIONAL UPDATE:
     // Prevents race conditions by locking condition in a single database statement
     const result = await prisma.slot.updateMany({
       where: {
         id: slotId,
         bookedById: null, // Atomic lock condition: must not be booked yet
         isBlocked: false, // Cannot book blocked slots
+        startTime: { gt: new Date() },
       },
       data: {
         bookedById: session.user.id,
@@ -225,35 +266,9 @@ export async function bookSlot(slotId: string): Promise<ActionResponse> {
     });
 
     if (result.count === 0) {
-      const existing = await prisma.slot.findUnique({
-        where: { id: slotId },
-        select: { bookedById: true, isBlocked: true },
-      });
-
-      if (!existing) {
-        return {
-          success: false,
-          error: "Slot jadwal tidak ditemukan atau telah dihapus.",
-        };
-      }
-
-      if (existing.isBlocked) {
-        return {
-          success: false,
-          error: "Maaf, slot jadwal ini sedang diblokir oleh Dosen.",
-        };
-      }
-
-      if (existing.bookedById) {
-        return {
-          success: false,
-          error: "Maaf, slot jadwal ini baru saja dibooking oleh mahasiswa lain.",
-        };
-      }
-
       return {
         success: false,
-        error: "Gagal memproses booking slot. Silakan coba kembali.",
+        error: "Maaf, slot jadwal ini baru saja dibooking oleh mahasiswa lain atau waktu pelaksanaan telah lewat.",
       };
     }
 

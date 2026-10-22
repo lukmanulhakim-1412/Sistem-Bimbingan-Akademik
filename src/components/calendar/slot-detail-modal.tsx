@@ -76,6 +76,7 @@ export function SlotDetailModal({
   const isBookedByMe = slot.bookedById === user.id;
   const isBlocked = !!slot.isBlocked;
   const isRecurring = !!slot.recurringGroupId;
+  const isPast = new Date(slot.startTime) <= new Date();
   const student = slot.bookedBy;
 
   const handleSaveLocation = () => {
@@ -190,6 +191,11 @@ export function SlotDetailModal({
                 {isBooked ? (
                   <Badge className="bg-blue-600 text-white font-medium text-xs">
                     {isBookedByMe ? "Jadwal Anda" : "Sudah Dibooking"}
+                  </Badge>
+                ) : isPast ? (
+                  <Badge className="bg-[#2d2f31] text-[#9aa0a6] border border-[#3c4043] font-medium text-xs flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    <span>Telah Lewat</span>
                   </Badge>
                 ) : (
                   <Badge className="bg-emerald-600 text-white font-medium text-xs">
@@ -533,6 +539,11 @@ export function SlotDetailModal({
                 <div className="w-full py-2.5 rounded-lg bg-amber-950/40 border border-amber-700/60 text-center font-medium text-amber-300 text-xs flex items-center justify-center gap-2">
                   <Ban className="h-4 w-4 text-amber-400" />
                   <span>Jadwal Ini Diblokir Dosen (Tidak Tersedia)</span>
+                </div>
+              ) : isPast && !isBooked ? (
+                <div className="w-full py-2.5 rounded-lg bg-[#282a2d] border border-[#3c4043] text-center font-medium text-[#9aa0a6] text-xs flex items-center justify-center gap-2 cursor-not-allowed">
+                  <Clock className="h-4 w-4 text-[#9aa0a6]" />
+                  <span>Waktu Konsultasi Sudah Lewat (Kedaluwarsa)</span>
                 </div>
               ) : !isBooked ? (
                 <Button
