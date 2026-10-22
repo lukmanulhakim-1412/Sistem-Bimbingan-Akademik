@@ -53,7 +53,7 @@ export function GoogleCalendarDashboard({
     showAvailable: true,
     showBooked: true,
     showCompleted: true,
-    showMyBookingsOnly: false,
+    showMyBookings: true,
     showOnline: true,
     showOffline: true,
   });
@@ -75,9 +75,12 @@ export function GoogleCalendarDashboard({
   const availableCount = initialSlots.filter(
     (s) => s.bookedById === null && !s.isBlocked && new Date(s.startTime).getTime() > nowMs
   ).length;
-  const bookedCount = initialSlots.filter(
-    (s) => s.bookedById !== null && new Date(s.endTime).getTime() > nowMs
+  const otherBookedCount = initialSlots.filter(
+    (s) => s.bookedById !== null && s.bookedById !== user.id && new Date(s.endTime).getTime() > nowMs
   ).length;
+  const bookedCount = isLecturer
+    ? initialSlots.filter((s) => s.bookedById !== null && new Date(s.endTime).getTime() > nowMs).length
+    : otherBookedCount;
   const completedCount = initialSlots.filter(
     (s) => s.bookedById !== null && new Date(s.endTime).getTime() <= nowMs
   ).length;
@@ -109,20 +112,35 @@ export function GoogleCalendarDashboard({
 
       const endMs = new Date(slot.endTime).getTime();
       const isCompleted = isBooked && nowMs >= endMs;
-      const isActiveBooked = isBooked && nowMs < endMs;
+      const isActive = isBooked && nowMs < endMs;
 
-      // If student checks "Hanya Jadwal Saya", only slots booked by the current user should be shown
-      if (filters.showMyBookingsOnly && !isBookedByMe) return false;
-
-      if (!filters.showAvailable && isAvailable) return false;
-
-      // For active booked slots: if showMyBookingsOnly is active and slot is booked by me, keep it visible
-      if (!filters.showBooked && isActiveBooked && !filters.showMyBookingsOnly) {
-        return false;
+      // 1. Slot Kosong / Diblokir
+      if (isAvailable || isBlocked) {
+        if (!filters.showAvailable) return false;
+      }
+      // 2. Slot Selesai
+      else if (isCompleted) {
+        if (!filters.showCompleted) return false;
+        if (!isLecturer) {
+          if (isBookedByMe && !filters.showMyBookings) return false;
+          if (!isBookedByMe && !filters.showBooked) return false;
+        }
+      }
+      // 3. Slot Aktif / Mendatang
+      else if (isActive) {
+        if (isLecturer) {
+          if (!filters.showBooked) return false;
+        } else {
+          // Untuk mahasiswa: Jadwal Saya vs Sudah Dibooking (orang lain)
+          if (isBookedByMe) {
+            if (!filters.showMyBookings) return false;
+          } else {
+            if (!filters.showBooked) return false;
+          }
+        }
       }
 
-      if (!filters.showCompleted && isCompleted) return false;
-
+      // 4. Meeting Type Filters
       const isOnline = slot.type === MeetingType.ONLINE;
       const isOffline = slot.type === MeetingType.OFFLINE;
 
@@ -131,7 +149,7 @@ export function GoogleCalendarDashboard({
 
       return true;
     });
-  }, [initialSlots, filters, user.id, nowMs]);
+  }, [initialSlots, filters, user.id, isLecturer, nowMs]);
 
   // Navigation handlers
   const handlePrev = () => {

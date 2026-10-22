@@ -10,7 +10,7 @@ export interface CalendarFilters {
   showAvailable: boolean;
   showBooked: boolean;
   showCompleted: boolean;
-  showMyBookingsOnly: boolean;
+  showMyBookings: boolean;
   showOnline: boolean;
   showOffline: boolean;
 }

@@ -144,35 +144,35 @@ export function CalendarSidebar({
               </div>
             </label>
 
-            {/* Student: My Bookings Only Filter */}
+            {/* Student: My Bookings Filter */}
             {!isLecturer && (
               <label className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-[#2d2f31] cursor-pointer text-xs text-[#e3e3e3] transition-colors">
                 <input
                   type="checkbox"
-                  checked={filters.showMyBookingsOnly}
+                  checked={filters.showMyBookings}
                   onChange={(e) =>
                     onFilterChange({
                       ...filters,
-                      showMyBookingsOnly: e.target.checked,
+                      showMyBookings: e.target.checked,
                     })
                   }
                   className="sr-only"
                 />
                 <div
                   className={`h-4 w-4 shrink-0 rounded flex items-center justify-center transition-colors border ${
-                    filters.showMyBookingsOnly
+                    filters.showMyBookings
                       ? "bg-indigo-600 border-indigo-500 text-white"
                       : "border-[#5f6368] bg-transparent"
                   }`}
                 >
-                  {filters.showMyBookingsOnly && (
+                  {filters.showMyBookings && (
                     <Check className="h-3 w-3 stroke-[3]" />
                   )}
                 </div>
                 <div className="flex-1 flex items-center justify-between gap-3 min-w-0">
                   <span className="flex items-center gap-1.5 whitespace-nowrap">
                     <User className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
-                    <span>Hanya Jadwal Saya</span>
+                    <span>Jadwal Saya</span>
                   </span>
                   {typeof myBookingsCount === "number" && (
                     <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-950/60 text-indigo-400 border border-indigo-800/40 min-w-[20px] text-center ml-2">
@@ -269,6 +269,12 @@ export function CalendarSidebar({
           <span className="text-blue-400">Sudah Dibooking:</span>
           <span className="font-semibold text-blue-300">{bookedCount}</span>
         </div>
+        {!isLecturer && typeof myBookingsCount === "number" && (
+          <div className="flex items-center justify-between">
+            <span className="text-indigo-400">Jadwal Saya:</span>
+            <span className="font-semibold text-indigo-300">{myBookingsCount}</span>
+          </div>
+        )}
         <div className="flex items-center justify-between">
           <span className="text-slate-400">Selesai:</span>
           <span className="font-semibold text-slate-300">{completedCount}</span>
