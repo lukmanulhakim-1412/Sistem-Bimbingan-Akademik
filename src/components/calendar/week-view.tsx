@@ -281,7 +281,7 @@ export function WeekView({
                                 ? "Online"
                                 : "Tatap Muka"}
                             </span>
-                            {slot.recurringGroupId && (
+                            {isLecturer && slot.recurringGroupId && (
                               <span title="Berulang Mingguan" className="ml-auto flex items-center">
                                 <Repeat className="h-2.5 w-2.5 shrink-0 text-blue-300" />
                               </span>

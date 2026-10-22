@@ -205,7 +205,7 @@ export function SlotDetailModal({
               </>
             )}
 
-            {isRecurring && (
+            {isLecturer && isRecurring && (
               <Badge className="bg-blue-950/80 text-blue-300 border border-blue-700/60 font-medium text-xs flex items-center gap-1">
                 <Repeat className="h-3 w-3" />
                 <span>Mingguan</span>

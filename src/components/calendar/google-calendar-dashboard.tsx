@@ -286,7 +286,7 @@ export function GoogleCalendarDashboard({
                                 </Badge>
                               )}
 
-                              {slot.recurringGroupId && (
+                              {isLecturer && slot.recurringGroupId && (
                                 <Badge className="bg-blue-950 text-blue-300 border border-blue-800 text-[10px] sm:text-[11px] flex items-center gap-1">
                                   <Repeat className="h-3 w-3" />
                                   <span>Mingguan</span>

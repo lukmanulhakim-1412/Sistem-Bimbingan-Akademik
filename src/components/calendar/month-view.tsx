@@ -165,7 +165,7 @@ export function MonthView({
                               : "Terisi"
                             : "Tersedia"}
                         </span>
-                        {slot.recurringGroupId && (
+                        {isLecturer && slot.recurringGroupId && (
                           <Repeat className="h-2 w-2 shrink-0 text-blue-300 ml-auto" />
                         )}
                       </div>
