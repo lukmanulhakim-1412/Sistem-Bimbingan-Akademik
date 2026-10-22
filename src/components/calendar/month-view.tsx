@@ -115,16 +115,17 @@ export function MonthView({
                     const isBooked = !!slot.bookedById;
                     const isBookedByMe = slot.bookedById === user.id;
                     const isBlocked = !!slot.isBlocked;
-                    const isExpired = !isBooked && new Date(slot.startTime) <= new Date();
+                    const isCompleted = isBooked && new Date(slot.startTime) <= new Date();
 
                     let pillColor =
                       "bg-emerald-950/80 border border-emerald-600 text-emerald-300";
                     if (isBlocked) {
                       pillColor =
                         "bg-amber-950/80 border border-amber-600 text-amber-300";
-                    } else if (isExpired) {
-                      pillColor =
-                        "bg-[#282a2d] border border-[#5f6368] text-[#9aa0a6]";
+                    } else if (isCompleted) {
+                      pillColor = isBookedByMe || isLecturer
+                        ? "bg-slate-900/90 border border-slate-600 text-slate-300"
+                        : "bg-[#282a2d] border border-[#3c4043] text-[#9aa0a6]";
                     } else if (isBookedByMe || (isLecturer && isBooked)) {
                       pillColor =
                         "bg-blue-950/80 border border-blue-600 text-blue-300";
@@ -155,8 +156,12 @@ export function MonthView({
                         <span className="truncate">
                           {isBlocked
                             ? slot.blockReason || (isLecturer ? "Diblokir" : "Tidak Tersedia")
-                            : isExpired
-                            ? "Kadaluarsa"
+                            : isCompleted
+                            ? isLecturer
+                              ? `${slot.bookedBy?.fullName || "Selesai"} • Selesai`
+                              : isBookedByMe
+                              ? "Selesai (Jadwal Anda)"
+                              : "Selesai"
                             : isBooked
                             ? isLecturer
                               ? slot.bookedBy?.fullName || "Booked"

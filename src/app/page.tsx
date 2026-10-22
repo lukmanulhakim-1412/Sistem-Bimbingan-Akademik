@@ -55,10 +55,22 @@ export default async function DashboardPage() {
     if (!isLecturer) session.user.isOnboarded = true;
   }
 
-  // 4. Time-bounded slot query: loads 2 months in past up to 12 months in future for optimal query performance
+  // 4. Time-bounded slot query & cleanup of unbooked expired slots
   const now = new Date();
   const pastWindow = new Date(now.getFullYear(), now.getMonth() - 2, 1, 0, 0, 0, 0);
   const futureWindow = new Date(now.getFullYear(), now.getMonth() + 12, 0, 23, 59, 59, 999);
+
+  // Clean up unbooked expired slots from database so they don't clutter the system
+  try {
+    await prisma.slot.deleteMany({
+      where: {
+        bookedById: null,
+        startTime: { lte: now },
+      },
+    });
+  } catch (err) {
+    console.error("Non-blocking cleanup of expired slots:", err);
+  }
 
   const allSlots = await prisma.slot.findMany({
     where: {
@@ -66,6 +78,11 @@ export default async function DashboardPage() {
         gte: pastWindow,
         lte: futureWindow,
       },
+      // Only include active future slots OR past slots that were actually booked
+      OR: [
+        { startTime: { gt: now } },
+        { bookedById: { not: null } },
+      ],
     },
     orderBy: {
       startTime: "asc",

@@ -12,7 +12,7 @@ import { id } from "date-fns/locale";
 import { SlotWithBookedBy, UserSessionInfo } from "./types";
 import { Role, MeetingType } from "@prisma/client";
 import { formatTime } from "@/lib/utils";
-import { Video, MapPin, Lock, User, Plus, Ban, Repeat, Clock } from "lucide-react";
+import { Video, MapPin, Lock, User, Plus, Ban, Repeat, Clock, CheckCircle2 } from "lucide-react";
 
 interface WeekViewProps {
   currentDate: Date;
@@ -220,16 +220,17 @@ export function WeekView({
                     const isBooked = !!slot.bookedById;
                     const isBookedByMe = slot.bookedById === user.id;
                     const isBlocked = !!slot.isBlocked;
-                    const isExpired = !isBooked && new Date(slot.startTime) <= new Date();
+                    const isCompleted = isBooked && new Date(slot.startTime) <= new Date();
 
                     // Google Calendar Card Theme Styles
                     let cardStyles = "";
                     if (isBlocked) {
                       cardStyles =
                         "bg-[#322314] border-l-4 border-l-amber-500 border border-amber-600/40 text-amber-200 hover:bg-[#3d2c1a]";
-                    } else if (isExpired) {
-                      cardStyles =
-                        "bg-[#282a2d] border-l-4 border-l-[#5f6368] border border-[#3c4043] text-[#9aa0a6] hover:bg-[#303134]";
+                    } else if (isCompleted) {
+                      cardStyles = isBookedByMe || isLecturer
+                        ? "bg-[#182533] border-l-4 border-l-slate-400 border border-slate-700/60 text-slate-300 hover:bg-[#1e2f42]"
+                        : "bg-[#202225] border border-[#3c4043] text-[#9aa0a6] opacity-70 hover:opacity-85";
                     } else if (isBookedByMe) {
                       cardStyles =
                         "bg-[#1b3a57] border-l-4 border-l-blue-400 border border-blue-500/40 text-blue-100 hover:bg-[#204777]";
@@ -263,11 +264,11 @@ export function WeekView({
                           <div className="flex items-center gap-1 font-semibold text-[11px] leading-tight truncate">
                             {isBlocked ? (
                               <Ban className="h-3 w-3 shrink-0 text-amber-400" />
-                            ) : isExpired ? (
+                            ) : isCompleted ? (
                               slot.type === MeetingType.ONLINE ? (
-                                <Video className="h-3 w-3 shrink-0 text-[#9aa0a6]" />
+                                <Video className="h-3 w-3 shrink-0 text-slate-400" />
                               ) : (
-                                <MapPin className="h-3 w-3 shrink-0 text-[#9aa0a6]" />
+                                <MapPin className="h-3 w-3 shrink-0 text-slate-400" />
                               )
                             ) : slot.type === MeetingType.ONLINE ? (
                               <Video className="h-3 w-3 shrink-0 text-sky-400" />
@@ -301,11 +302,27 @@ export function WeekView({
                               <Ban className="h-2.5 w-2.5 shrink-0" />
                               <span>{isLecturer ? "Diblokir (Dosen)" : "Tidak Tersedia"}</span>
                             </span>
-                          ) : isExpired ? (
-                            <span className="text-[#9aa0a6] font-medium flex items-center gap-1">
-                              <Clock className="h-2.5 w-2.5 shrink-0" />
-                              <span>Kadaluarsa</span>
-                            </span>
+                          ) : isCompleted ? (
+                            isLecturer ? (
+                              <span className="flex items-center gap-1 font-medium text-slate-300">
+                                <CheckCircle2 className="h-2.5 w-2.5 shrink-0 text-blue-400" />
+                                <span className="truncate">
+                                  {slot.bookedBy?.fullName ||
+                                    slot.bookedBy?.name ||
+                                    "Mahasiswa"} (Selesai)
+                                </span>
+                              </span>
+                            ) : isBookedByMe ? (
+                              <span className="flex items-center gap-1 font-medium text-slate-300">
+                                <CheckCircle2 className="h-2.5 w-2.5 shrink-0 text-blue-400" />
+                                <span>Selesai (Jadwal Anda)</span>
+                              </span>
+                            ) : (
+                              <span className="flex items-center gap-1 text-[#9aa0a6] font-medium">
+                                <CheckCircle2 className="h-2.5 w-2.5 shrink-0" />
+                                <span>Selesai</span>
+                              </span>
+                            )
                           ) : isBooked ? (
                             isLecturer ? (
                               <span className="flex items-center gap-1 font-medium text-blue-200">

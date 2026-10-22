@@ -33,6 +33,7 @@ import {
   Repeat,
   Ban,
   ShieldCheck,
+  CheckCircle2,
 } from "lucide-react";
 
 interface SlotDetailModalProps {
@@ -77,6 +78,7 @@ export function SlotDetailModal({
   const isBlocked = !!slot.isBlocked;
   const isRecurring = !!slot.recurringGroupId;
   const isPast = new Date(slot.startTime) <= new Date();
+  const isCompleted = isBooked && isPast;
   const student = slot.bookedBy;
 
   const handleSaveLocation = () => {
@@ -188,7 +190,14 @@ export function SlotDetailModal({
                   </Badge>
                 )}
 
-                {isBooked ? (
+                {isCompleted ? (
+                  <Badge className="bg-slate-800 text-slate-200 border border-slate-600 font-medium text-xs flex items-center gap-1">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-blue-400" />
+                    <span>
+                      {isBookedByMe ? "Selesai (Jadwal Anda)" : "Selesai"}
+                    </span>
+                  </Badge>
+                ) : isBooked ? (
                   <Badge className="bg-blue-600 text-white font-medium text-xs">
                     {isBookedByMe ? "Jadwal Anda" : "Sudah Dibooking"}
                   </Badge>
@@ -205,7 +214,7 @@ export function SlotDetailModal({
               </>
             )}
 
-            {isLecturer && isRecurring && (
+            {isRecurring && (
               <Badge className="bg-blue-950/80 text-blue-300 border border-blue-700/60 font-medium text-xs flex items-center gap-1">
                 <Repeat className="h-3 w-3" />
                 <span>Mingguan</span>
@@ -540,10 +549,14 @@ export function SlotDetailModal({
                   <Ban className="h-4 w-4 text-amber-400" />
                   <span>Jadwal Ini Diblokir Dosen (Tidak Tersedia)</span>
                 </div>
-              ) : isPast && !isBooked ? (
-                <div className="w-full py-2.5 rounded-lg bg-[#282a2d] border border-[#3c4043] text-center font-medium text-[#9aa0a6] text-xs flex items-center justify-center gap-2 cursor-not-allowed">
-                  <Clock className="h-4 w-4 text-[#9aa0a6]" />
-                  <span>Waktu Konsultasi Sudah Lewat (Kadaluarsa)</span>
+              ) : isCompleted ? (
+                <div className="w-full py-2.5 rounded-lg bg-slate-900/60 border border-slate-700/60 text-center font-medium text-slate-300 text-xs flex items-center justify-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-blue-400" />
+                  <span>
+                    {isBookedByMe
+                      ? "Sesi Konsultasi Anda Telah Selesai"
+                      : "Sesi Konsultasi Telah Selesai"}
+                  </span>
                 </div>
               ) : !isBooked ? (
                 <Button

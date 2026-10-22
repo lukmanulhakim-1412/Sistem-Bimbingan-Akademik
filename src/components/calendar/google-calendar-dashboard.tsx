@@ -23,7 +23,7 @@ import { StudentWhitelistModal } from "./student-whitelist-modal";
 import { Role, MeetingType } from "@prisma/client";
 import { formatDate, formatTimeRange } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Video, MapPin, Clock, Inbox, UserCheck, X, Ban, Repeat } from "lucide-react";
+import { Video, MapPin, Clock, Inbox, UserCheck, X, Ban, Repeat, CheckCircle2 } from "lucide-react";
 
 interface GoogleCalendarDashboardProps {
   initialSlots: SlotWithBookedBy[];
@@ -80,6 +80,10 @@ export function GoogleCalendarDashboard({
       const isBlocked = slot.isBlocked;
       const isAvailable = !isBooked && !isBlocked;
       const isBookedByMe = slot.bookedById === user.id;
+      const isExpired = !isBooked && new Date(slot.startTime) <= new Date();
+
+      // Exclude expired unbooked slots from the view
+      if (isExpired) return false;
 
       if (!filters.showAvailable && isAvailable) return false;
       if (!filters.showBooked && isBooked) return false;
@@ -249,7 +253,7 @@ export function GoogleCalendarDashboard({
                     {filteredSlots.map((slot) => {
                       const isBooked = !!slot.bookedById;
                       const isBookedByMe = slot.bookedById === user.id;
-                      const isExpired = !isBooked && new Date(slot.startTime) <= new Date();
+                      const isCompleted = isBooked && new Date(slot.startTime) <= new Date();
 
                       return (
                         <div
@@ -297,9 +301,14 @@ export function GoogleCalendarDashboard({
                                 <Badge className="bg-amber-700/80 text-white text-[10px] sm:text-[11px]">
                                   {isLecturer ? "Diblokir Dosen" : "Tidak Tersedia"}
                                 </Badge>
-                              ) : isExpired ? (
-                                <Badge className="bg-[#282a2d] border border-[#5f6368] text-[#9aa0a6] text-[10px] sm:text-[11px]">
-                                  Kadaluarsa
+                              ) : isCompleted ? (
+                                <Badge className="bg-slate-800 text-slate-300 border border-slate-600 text-[10px] sm:text-[11px] flex items-center gap-1">
+                                  <CheckCircle2 className="h-3 w-3 text-blue-400" />
+                                  <span>
+                                    {isBookedByMe
+                                      ? "Selesai (Jadwal Anda)"
+                                      : "Selesai"}
+                                  </span>
                                 </Badge>
                               ) : isBooked ? (
                                 <Badge className="bg-blue-600 text-white text-[10px] sm:text-[11px]">
