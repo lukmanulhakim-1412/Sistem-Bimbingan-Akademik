@@ -31,7 +31,7 @@ export function CalendarSidebar({
   const isLecturer = user.role === Role.LECTURER;
 
   return (
-    <aside className="w-full h-full min-h-full flex-1 bg-[#1e1f20] border-r border-[#3c4043] flex flex-col p-4 gap-6 select-none overflow-y-auto">
+    <aside className="w-64 shrink-0 bg-[#1e1f20] border-r border-[#3c4043] flex flex-col p-4 gap-6 select-none overflow-y-auto">
       {/* Create Slot Button for Lecturers / Info Box for Students */}
       {isLecturer ? (
         <div>
