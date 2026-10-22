@@ -3,7 +3,7 @@
 import { Role } from "@prisma/client";
 import { MiniCalendar } from "./mini-calendar";
 import { CalendarFilters, UserSessionInfo } from "./types";
-import { Plus, Check, Calendar, CheckCircle2, Clock } from "lucide-react";
+import { Check, Calendar, CheckCircle2 } from "lucide-react";
 
 interface CalendarSidebarProps {
   currentDate: Date;
@@ -32,33 +32,6 @@ export function CalendarSidebar({
 
   return (
     <aside className="w-64 shrink-0 bg-[#1e1f20] border-r border-[#3c4043] flex flex-col p-4 gap-6 select-none overflow-y-auto">
-      {/* Create Slot Button for Lecturers / Info Box for Students */}
-      {isLecturer ? (
-        <div>
-          <button
-            type="button"
-            onClick={onOpenCreateModal}
-            className="w-full h-12 px-5 rounded-full bg-[#303134] hover:bg-[#3c4043] border border-[#5f6368] hover:shadow-lg transition-all flex items-center gap-3 text-white font-medium shadow-md text-sm group active:scale-[0.98]"
-          >
-            {/* Google colored plus icon */}
-            <div className="relative flex items-center justify-center">
-              <Plus className="h-6 w-6 text-blue-400 group-hover:rotate-90 transition-transform duration-200" />
-            </div>
-            <span>Buat Slot Baru</span>
-          </button>
-        </div>
-      ) : (
-        <div className="bg-[#2d2f31] border border-[#3c4043] rounded-xl p-3.5 text-xs text-[#c4c7c5] space-y-1.5">
-          <p className="font-semibold text-white flex items-center gap-1.5">
-            <Clock className="h-3.5 w-3.5 text-blue-400" />
-            <span>Portal Mahasiswa</span>
-          </p>
-          <p className="text-[11px] text-[#9aa0a6] leading-relaxed">
-            Pilih slot konsultasi yang berstatus <span className="text-emerald-400 font-medium">Tersedia</span> pada kalender untuk mengajukan bimbingan.
-          </p>
-        </div>
-      )}
-
       {/* Mini Calendar Picker */}
       <div className="border-b border-[#3c4043] pb-5">
         <MiniCalendar currentDate={currentDate} onSelectDate={onSelectDate} />

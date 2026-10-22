@@ -111,9 +111,6 @@ export function CalendarHeader({
           <span className="text-base sm:text-lg font-normal tracking-tight text-white hidden xs:inline-block">
             Calendar
           </span>
-          <span className="hidden lg:inline-block px-2 py-0.5 rounded-md bg-[#2d2f31] text-[#9aa0a6] text-[11px] font-medium border border-[#3c4043]">
-            Bimbingan
-          </span>
         </div>
 
         {/* Today Button */}
