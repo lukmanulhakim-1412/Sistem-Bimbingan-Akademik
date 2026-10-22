@@ -11,7 +11,7 @@ import {
 import { id } from "date-fns/locale";
 import { SlotWithBookedBy, UserSessionInfo } from "./types";
 import { Role, MeetingType } from "@prisma/client";
-import { formatTime } from "@/lib/utils";
+import { formatTime, getWIBParts, isSameDayWIB, isTodayWIB } from "@/lib/utils";
 import { Video, MapPin, Lock, User, Plus, Ban, Repeat, Clock, CheckCircle2 } from "lucide-react";
 
 interface WeekViewProps {
@@ -40,7 +40,7 @@ export function WeekView({
   // Auto-scroll to daytime / current time on initial mount
   useEffect(() => {
     if (scrollContainerRef.current) {
-      const currentHour = new Date().getHours();
+      const currentHour = getWIBParts(new Date()).hour;
       const targetHour = Math.max(
         0,
         Math.min(currentHour > 7 ? currentHour - 1 : 7, 18)
@@ -59,7 +59,7 @@ export function WeekView({
     [weekStart]
   );
 
-  // Live current time calculation for the red line
+  // Live current time calculation for the red line (WIB timezone)
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
@@ -67,7 +67,8 @@ export function WeekView({
     return () => clearInterval(timer);
   }, []);
 
-  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const pNow = getWIBParts(now);
+  const nowMinutes = pNow.hour * 60 + pNow.minute;
   const currentIndicatorTop = (nowMinutes / 60) * HOUR_HEIGHT;
   const isNowWithinHours = true;
 
@@ -90,9 +91,9 @@ export function WeekView({
           {/* 7 Day Header Columns */}
           <div className="flex-1 grid grid-cols-7 divide-x divide-[#3c4043]">
             {weekDays.map((day, idx) => {
-              const today = isToday(day);
+              const today = isTodayWIB(day);
               const dayName = format(day, "EEE", { locale: id }).toUpperCase();
-              const dayNum = day.getDate();
+              const dayNum = getWIBParts(day).day;
 
               return (
                 <div
@@ -150,11 +151,11 @@ export function WeekView({
           {/* 7 Day Columns Grid */}
           <div className="flex-1 grid grid-cols-7 divide-x divide-[#3c4043] relative">
             {weekDays.map((day, dayIndex) => {
-              const today = isToday(day);
+              const today = isTodayWIB(day);
 
-              // Filter slots falling on this day
+              // Filter slots falling on this day in WIB timezone
               const daySlots = slots.filter((slot) =>
-                isSameDay(new Date(slot.startTime), day)
+                isSameDayWIB(slot.startTime, day)
               );
 
               return (
@@ -200,15 +201,13 @@ export function WeekView({
 
                   {/* Render Slot Cards in this Column */}
                   {daySlots.map((slot) => {
-                    const start = new Date(slot.startTime);
-                    const end = new Date(slot.endTime);
-
-                    const startH = start.getHours();
-                    const startM = start.getMinutes();
+                    const pStart = getWIBParts(slot.startTime);
+                    const startH = pStart.hour;
+                    const startM = pStart.minute;
                     const durationMinutes =
-                      (end.getTime() - start.getTime()) / (1000 * 60);
+                      (new Date(slot.endTime).getTime() - new Date(slot.startTime).getTime()) / (1000 * 60);
 
-                    // Calculate position
+                    // Calculate position in 24h WIB grid
                     const top =
                       ((startH * 60 + startM - START_HOUR * 60) / 60) *
                       HOUR_HEIGHT;
@@ -220,7 +219,7 @@ export function WeekView({
                     const isBooked = !!slot.bookedById;
                     const isBookedByMe = slot.bookedById === user.id;
                     const isBlocked = !!slot.isBlocked;
-                    const isCompleted = isBooked && new Date(slot.startTime) <= new Date();
+                    const isCompleted = isBooked && new Date(slot.startTime).getTime() <= Date.now();
 
                     // Google Calendar Card Theme Styles
                     let cardStyles = "";

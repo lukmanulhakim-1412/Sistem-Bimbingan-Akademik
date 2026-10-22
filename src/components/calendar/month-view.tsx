@@ -13,7 +13,7 @@ import {
 } from "date-fns";
 import { SlotWithBookedBy, UserSessionInfo } from "./types";
 import { Role, MeetingType } from "@prisma/client";
-import { formatTime } from "@/lib/utils";
+import { formatTime, isSameDayWIB, isTodayWIB } from "@/lib/utils";
 import { Video, MapPin, Ban, Repeat } from "lucide-react";
 
 interface MonthViewProps {
@@ -70,11 +70,11 @@ export function MonthView({
         <div className="flex-1 grid grid-cols-7 auto-rows-fr divide-x divide-y divide-[#3c4043] min-h-[550px]">
           {days.map((day, index) => {
             const isCurrentMonth = isSameMonth(day, currentDate);
-            const today = isToday(day);
+            const today = isTodayWIB(day);
 
-            // Get slots for this day
+            // Get slots for this day in WIB timezone
             const daySlots = slots.filter((slot) =>
-              isSameDay(new Date(slot.startTime), day)
+              isSameDayWIB(slot.startTime, day)
             );
 
             return (
@@ -115,7 +115,7 @@ export function MonthView({
                     const isBooked = !!slot.bookedById;
                     const isBookedByMe = slot.bookedById === user.id;
                     const isBlocked = !!slot.isBlocked;
-                    const isCompleted = isBooked && new Date(slot.startTime) <= new Date();
+                    const isCompleted = isBooked && new Date(slot.startTime).getTime() <= Date.now();
 
                     let pillColor =
                       "bg-emerald-950/80 border border-emerald-600 text-emerald-300";

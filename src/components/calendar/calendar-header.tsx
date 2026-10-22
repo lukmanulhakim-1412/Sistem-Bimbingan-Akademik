@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Role } from "@prisma/client";
 import { CalendarViewMode, UserSessionInfo } from "./types";
 import { LogoutButton } from "@/components/logout-button";
+import { getWIBParts } from "@/lib/utils";
 import Link from "next/link";
 import {
   ChevronLeft,
@@ -43,7 +44,7 @@ export function CalendarHeader({
   onOpenWhitelistModal,
 }: CalendarHeaderProps) {
   const isLecturer = user.role === Role.LECTURER;
-  const currentDayNum = new Date().getDate();
+  const currentDayNum = getWIBParts(new Date()).day;
 
   // Student profile dropdown state
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
@@ -78,12 +79,14 @@ export function CalendarHeader({
 
   // Full format for tablet/desktop (e.g. "Oktober 2026")
   const fullMonthYear = new Intl.DateTimeFormat("id-ID", {
+    timeZone: "Asia/Jakarta",
     month: "long",
     year: "numeric",
   }).format(currentDate);
 
   // Short format for mobile (e.g. "Okt 2026")
   const shortMonthYear = new Intl.DateTimeFormat("id-ID", {
+    timeZone: "Asia/Jakarta",
     month: "short",
     year: "numeric",
   }).format(currentDate);

@@ -21,7 +21,7 @@ import { CreateSlotModal } from "./create-slot-modal";
 import { SlotDetailModal } from "./slot-detail-modal";
 import { StudentWhitelistModal } from "./student-whitelist-modal";
 import { Role, MeetingType } from "@prisma/client";
-import { formatDate, formatTimeRange } from "@/lib/utils";
+import { formatDate, formatTimeRange, getWIBDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Video, MapPin, Clock, Inbox, UserCheck, X, Ban, Repeat, CheckCircle2 } from "lucide-react";
 
@@ -37,7 +37,7 @@ export function GoogleCalendarDashboard({
   const isLecturer = user.role === Role.LECTURER;
 
   // Calendar State
-  const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const [currentDate, setCurrentDate] = useState<Date>(() => getWIBDate());
   const [viewMode, setViewMode] = useState<CalendarViewMode>("week");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -69,18 +69,19 @@ export function GoogleCalendarDashboard({
   // KPI Calculations
   const totalSlots = initialSlots.length;
   const availableCount = initialSlots.filter(
-    (s) => s.bookedById === null && !s.isBlocked && new Date(s.startTime) > new Date()
+    (s) => s.bookedById === null && !s.isBlocked && new Date(s.startTime).getTime() > Date.now()
   ).length;
   const bookedCount = initialSlots.filter((s) => s.bookedById !== null).length;
 
   // Filtered Slots
   const filteredSlots = useMemo(() => {
+    const nowMs = Date.now();
     return initialSlots.filter((slot) => {
       const isBooked = slot.bookedById !== null;
       const isBlocked = slot.isBlocked;
       const isAvailable = !isBooked && !isBlocked;
       const isBookedByMe = slot.bookedById === user.id;
-      const isExpired = !isBooked && new Date(slot.startTime) <= new Date();
+      const isExpired = !isBooked && new Date(slot.startTime).getTime() <= nowMs;
 
       // Exclude expired unbooked slots from the view
       if (isExpired) return false;
@@ -111,7 +112,7 @@ export function GoogleCalendarDashboard({
   };
 
   const handleToday = () => {
-    setCurrentDate(new Date());
+    setCurrentDate(getWIBDate());
   };
 
   const handleOpenCreateModal = (date?: Date, hour?: number) => {
@@ -253,7 +254,7 @@ export function GoogleCalendarDashboard({
                     {filteredSlots.map((slot) => {
                       const isBooked = !!slot.bookedById;
                       const isBookedByMe = slot.bookedById === user.id;
-                      const isCompleted = isBooked && new Date(slot.startTime) <= new Date();
+                      const isCompleted = isBooked && new Date(slot.startTime).getTime() <= Date.now();
 
                       return (
                         <div

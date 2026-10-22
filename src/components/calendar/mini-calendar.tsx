@@ -8,11 +8,10 @@ import {
   endOfWeek,
   eachDayOfInterval,
   isSameMonth,
-  isSameDay,
-  isToday,
   addMonths,
   subMonths,
 } from "date-fns";
+import { isSameDayWIB, isTodayWIB } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface MiniCalendarProps {
@@ -73,8 +72,8 @@ export function MiniCalendar({ currentDate, onSelectDate }: MiniCalendarProps) {
       <div className="grid grid-cols-7 gap-y-1 text-center">
         {days.map((day, index) => {
           const isCurrentMonth = isSameMonth(day, pickerMonth);
-          const isSelected = isSameDay(day, currentDate);
-          const isCurrentDay = isToday(day);
+          const isSelected = isSameDayWIB(day, currentDate);
+          const isCurrentDay = isTodayWIB(day);
 
           return (
             <div key={index} className="flex items-center justify-center h-7">

@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { formatDate } from "@/lib/utils";
+import { formatDate, getWIBParts } from "@/lib/utils";
 import {
   X,
   Loader2,
@@ -58,10 +58,10 @@ export function CreateSlotModal({
       setSuccessMessage(null);
       setSlotMode("slot");
 
-      const d = initialDate || new Date();
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
+      const p = getWIBParts(initialDate || new Date());
+      const year = p.year;
+      const month = String(p.month + 1).padStart(2, "0");
+      const day = String(p.day).padStart(2, "0");
       setDate(`${year}-${month}-${day}`);
 
       if (initialHour !== null && initialHour !== undefined) {
