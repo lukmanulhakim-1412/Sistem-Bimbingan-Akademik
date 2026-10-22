@@ -652,7 +652,7 @@ export function SlotDetailModal({
                           className="h-9 text-xs bg-red-600 hover:bg-red-700 text-white font-semibold flex items-center justify-center gap-1.5 shadow"
                         >
                           {isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-                          <span>Hapus Semua Minggu Berikutnya</span>
+                          <span>Hapus Semua Jadwal</span>
                         </Button>
                       </div>
 
