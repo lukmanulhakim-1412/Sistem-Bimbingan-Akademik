@@ -35,7 +35,7 @@ export function WeekView({
 }: WeekViewProps) {
   const isLecturer = user.role === Role.LECTURER;
 
-  // Calculate 7 days for the current week starting on Sunday (or Monday)
+  // Calculate 7 days for the current week starting on Sunday
   const weekStart = useMemo(
     () => startOfWeek(currentDate, { weekStartsOn: 0 }),
     [currentDate]
@@ -65,10 +65,10 @@ export function WeekView({
 
   return (
     <div className="flex-1 flex flex-col bg-[#131314] text-[#e3e3e3] overflow-hidden select-none">
-      {/* 1. Week Header Row (Sun - Sat) */}
+      {/* 1. Week Header Row (Sun - Sat) - Perfectly aligned with grid below */}
       <div className="flex border-b border-[#3c4043] bg-[#1e1f20] shrink-0 sticky top-0 z-20">
-        {/* Timezone label box */}
-        <div className="w-16 sm:w-20 shrink-0 border-r border-[#3c4043] flex flex-col items-center justify-end pb-2 text-[10px] sm:text-xs text-[#9aa0a6]">
+        {/* Timezone gutter label */}
+        <div className="w-16 sm:w-20 shrink-0 border-r border-[#3c4043] flex flex-col items-center justify-end pb-2.5 text-[10px] sm:text-xs text-[#9aa0a6] font-medium">
           <span>GMT+07</span>
         </div>
 
@@ -85,7 +85,7 @@ export function WeekView({
                 className="py-2.5 sm:py-3 flex flex-col items-center justify-center gap-1 text-center"
               >
                 <span
-                  className={`text-[10px] sm:text-xs font-medium uppercase tracking-wider ${
+                  className={`text-[10px] sm:text-xs font-semibold uppercase tracking-wider ${
                     today ? "text-blue-400 font-bold" : "text-[#9aa0a6]"
                   }`}
                 >
@@ -105,10 +105,13 @@ export function WeekView({
             );
           })}
         </div>
+
+        {/* 8px Scrollbar Spacer to match the 8px body scrollbar width */}
+        <div className="w-2 shrink-0 border-l border-[#3c4043] bg-[#1e1f20]" />
       </div>
 
       {/* 2. Scrollable Calendar Grid (Hours & Slots) */}
-      <div className="flex-1 overflow-y-auto relative flex">
+      <div className="flex-1 overflow-y-scroll relative flex">
         {/* Time Gutter Column */}
         <div className="w-16 sm:w-20 shrink-0 border-r border-[#3c4043] bg-[#18191b] select-none text-[10px] sm:text-xs text-[#9aa0a6]">
           {hoursArray.map((hour) => {
@@ -119,9 +122,10 @@ export function WeekView({
               <div
                 key={hour}
                 style={{ height: `${HOUR_HEIGHT}px` }}
-                className="relative pr-2 flex items-start justify-end -translate-y-2.5 font-medium"
+                className="border-b border-[#2d2f31] relative pr-2 flex items-start justify-end font-medium text-[11px]"
               >
-                <span>
+                {/* Time label sitting centered on the hour dividing line */}
+                <span className="absolute -bottom-2.5 right-2 bg-[#18191b] px-1 text-[10px] sm:text-[11px] font-medium leading-none text-[#9aa0a6] z-10">
                   {displayHour} {period}
                 </span>
               </div>
@@ -201,8 +205,6 @@ export function WeekView({
 
                   const isBooked = !!slot.bookedById;
                   const isBookedByMe = slot.bookedById === user.id;
-                  const isBookedByOther = isBooked && !isBookedByMe;
-                  const isPast = end < new Date();
 
                   // Google Calendar Card Theme Styles
                   let cardStyles = "";

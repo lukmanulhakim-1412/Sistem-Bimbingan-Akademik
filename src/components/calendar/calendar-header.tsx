@@ -8,7 +8,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Menu,
-  Calendar as CalendarIcon,
   ChevronDown,
   BookOpen,
 } from "lucide-react";
@@ -53,8 +52,8 @@ export function CalendarHeader({
       : "Mahasiswa";
 
   return (
-    <header className="h-16 border-b border-[#3c4043] bg-[#1e1f20] text-[#e3e3e3] px-3 sm:px-5 flex items-center justify-between select-none">
-      {/* Left section: Hamburger, Logo, Navigation, Month Title */}
+    <header className="h-16 border-b border-[#3c4043] bg-[#1e1f20] text-[#e3e3e3] px-3 sm:px-5 flex items-center justify-between select-none shrink-0 z-30">
+      {/* Left section: Hamburger, Clean Google Calendar Logo, Navigation, Month Title */}
       <div className="flex items-center gap-2 sm:gap-4">
         {/* Sidebar Toggle Button */}
         <button
@@ -66,20 +65,17 @@ export function CalendarHeader({
           <Menu className="h-5 w-5" />
         </button>
 
-        {/* Google Calendar Styled Logo */}
+        {/* Google Calendar Authentic Brand Logo */}
         <div className="flex items-center gap-2.5 mr-1 sm:mr-3">
-          <div className="relative h-9 w-9 rounded-lg bg-blue-600 flex flex-col items-center justify-center shadow-md font-bold text-white text-base">
-            <span className="text-[9px] font-normal uppercase tracking-wider text-blue-100 -mb-1">
-              Bimbingan
-            </span>
-            <span>{currentDayNum}</span>
+          <div className="h-10 w-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-md font-bold text-white text-lg tracking-tight select-none border border-blue-400/30 shrink-0">
+            {currentDayNum}
           </div>
-          <div className="hidden md:block">
-            <span className="text-lg font-semibold tracking-tight text-white leading-none block">
+          <div className="flex items-center gap-2">
+            <span className="text-xl font-normal tracking-tight text-white">
               Calendar
             </span>
-            <span className="text-[11px] text-[#9aa0a6] block leading-tight">
-              Portal Akademik
+            <span className="hidden sm:inline-block px-2 py-0.5 rounded-md bg-[#2d2f31] text-[#9aa0a6] text-[11px] font-medium border border-[#3c4043]">
+              Bimbingan Akademik
             </span>
           </div>
         </div>
@@ -126,7 +122,7 @@ export function CalendarHeader({
           <select
             value={viewMode}
             onChange={(e) => onViewModeChange(e.target.value as CalendarViewMode)}
-            className="h-9 rounded-md bg-[#2d2f31] border border-[#5f6368] text-xs sm:text-sm px-3 pr-8 text-white focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer appearance-none"
+            className="h-9 rounded-md bg-[#2d2f31] border border-[#5f6368] text-xs sm:text-sm px-3 pr-8 text-white focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer appearance-none font-medium"
           >
             <option value="week">Minggu (Week)</option>
             <option value="month">Bulan (Month)</option>
