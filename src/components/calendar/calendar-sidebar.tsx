@@ -16,6 +16,7 @@ interface CalendarSidebarProps {
   availableCount: number;
   bookedCount: number;
   completedCount: number;
+  myBookingsCount?: number;
   onlineCount: number;
   offlineCount: number;
 }
@@ -31,6 +32,7 @@ export function CalendarSidebar({
   availableCount,
   bookedCount,
   completedCount,
+  myBookingsCount,
   onlineCount,
   offlineCount,
 }: CalendarSidebarProps) {
@@ -167,11 +169,16 @@ export function CalendarSidebar({
                     <Check className="h-3 w-3 stroke-[3]" />
                   )}
                 </div>
-                <div className="flex-1 flex items-center justify-between">
+                <div className="flex-1 flex items-center justify-between gap-3 min-w-0">
                   <span className="flex items-center gap-1.5 whitespace-nowrap">
                     <User className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
                     <span>Hanya Jadwal Saya</span>
                   </span>
+                  {typeof myBookingsCount === "number" && (
+                    <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-950/60 text-indigo-400 border border-indigo-800/40 min-w-[20px] text-center ml-2">
+                      {myBookingsCount}
+                    </span>
+                  )}
                 </div>
               </label>
             )}

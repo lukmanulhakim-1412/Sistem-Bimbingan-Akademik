@@ -81,6 +81,9 @@ export function GoogleCalendarDashboard({
   const completedCount = initialSlots.filter(
     (s) => s.bookedById !== null && new Date(s.endTime).getTime() <= nowMs
   ).length;
+  const myBookingsCount = initialSlots.filter(
+    (s) => s.bookedById === user.id && new Date(s.endTime).getTime() > nowMs
+  ).length;
   const onlineCount = initialSlots.filter(
     (s) =>
       s.type === MeetingType.ONLINE &&
@@ -196,6 +199,7 @@ export function GoogleCalendarDashboard({
               availableCount={availableCount}
               bookedCount={bookedCount}
               completedCount={completedCount}
+              myBookingsCount={myBookingsCount}
               onlineCount={onlineCount}
               offlineCount={offlineCount}
             />
@@ -241,6 +245,7 @@ export function GoogleCalendarDashboard({
                   availableCount={availableCount}
                   bookedCount={bookedCount}
                   completedCount={completedCount}
+                  myBookingsCount={myBookingsCount}
                   onlineCount={onlineCount}
                   offlineCount={offlineCount}
                 />
