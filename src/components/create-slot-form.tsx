@@ -139,7 +139,7 @@ export function CreateSlotForm() {
                 onChange={(e) => setMeetingType(e.target.value as MeetingType)}
                 disabled={isPending}
               >
-                <option value={MeetingType.ONLINE}>Online - Microsoft Teams</option>
+                <option value={MeetingType.ONLINE}>Online</option>
                 <option value={MeetingType.OFFLINE}>Offline - Tatap Muka di Kampus</option>
               </Select>
             </div>
@@ -147,7 +147,7 @@ export function CreateSlotForm() {
             <div className="space-y-1.5">
               <Label htmlFor="locationDetails">
                 {meetingType === MeetingType.ONLINE
-                  ? "Tautan Rapat (MS Teams Link)"
+                  ? "Tautan Pertemuan Online"
                   : "Lokasi / Nomor Ruangan"}
               </Label>
               <div className="relative">
@@ -203,10 +203,10 @@ export function CreateSlotForm() {
                 </div>
                 <ul className="list-disc list-inside space-y-0.5 text-blue-800">
                   <li>
-                    <strong>Slot 1:</strong> {formatDate(currentSlotDate)} pukul {selectedTime} WIB ({meetingType === MeetingType.ONLINE ? "Online Teams" : "Tatap Muka"})
+                    <strong>Slot 1:</strong> {formatDate(currentSlotDate)} pukul {selectedTime} WIB ({meetingType === MeetingType.ONLINE ? "Online" : "Tatap Muka"})
                   </li>
                   <li>
-                    <strong>Slot 2 (Minggu Depan):</strong> {formatDate(nextWeekSlotDate)} pukul {selectedTime} WIB ({meetingType === MeetingType.ONLINE ? "Online Teams" : "Tatap Muka"})
+                    <strong>Slot 2 (Minggu Depan):</strong> {formatDate(nextWeekSlotDate)} pukul {selectedTime} WIB ({meetingType === MeetingType.ONLINE ? "Online" : "Tatap Muka"})
                   </li>
                 </ul>
               </div>

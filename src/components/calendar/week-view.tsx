@@ -259,7 +259,7 @@ export function WeekView({
                             )}
                             <span className="truncate">
                               {slot.type === MeetingType.ONLINE
-                                ? "Teams"
+                                ? "Online"
                                 : "Tatap Muka"}
                             </span>
                           </div>

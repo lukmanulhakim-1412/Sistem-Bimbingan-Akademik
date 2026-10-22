@@ -155,7 +155,7 @@ export function SlotDetailModal({
             {slot.type === MeetingType.ONLINE ? (
               <Badge className="bg-sky-900/80 text-sky-300 border border-sky-700/60 font-medium text-xs flex items-center gap-1">
                 <Video className="h-3 w-3" />
-                <span>Online (MS Teams)</span>
+                <span>Online</span>
               </Badge>
             ) : (
               <Badge className="bg-emerald-900/80 text-emerald-300 border border-emerald-700/60 font-medium text-xs flex items-center gap-1">
@@ -303,8 +303,8 @@ export function SlotDetailModal({
                   <p className="italic text-[#9aa0a6] mt-0.5">
                     {slot.type === MeetingType.ONLINE
                       ? isLecturer
-                        ? "Belum ada tautan. Klik 'Ubah Tautan' untuk menambahkan tautan MS Teams."
-                        : "Tautan Microsoft Teams akan diinfokan oleh Dosen."
+                        ? "Belum ada tautan. Klik 'Ubah Tautan' untuk menambahkan tautan pertemuan online."
+                        : "Tautan pertemuan online akan diinfokan oleh Dosen."
                       : "Ruangan tatap muka akan diinfokan di kampus."}
                   </p>
                 )}

@@ -268,7 +268,7 @@ export function GoogleCalendarDashboard({
                               {slot.type === MeetingType.ONLINE ? (
                                 <Badge className="bg-sky-950 text-sky-400 border border-sky-800 text-[10px] sm:text-[11px] flex items-center gap-1">
                                   <Video className="h-3 w-3" />
-                                  <span>Online Teams</span>
+                                  <span>Online</span>
                                 </Badge>
                               ) : (
                                 <Badge className="bg-emerald-950 text-emerald-400 border border-emerald-800 text-[10px] sm:text-[11px] flex items-center gap-1">
