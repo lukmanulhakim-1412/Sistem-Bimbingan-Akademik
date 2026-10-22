@@ -9,6 +9,8 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth;
 
   const isLoginPage = nextUrl.pathname === "/login";
+  const isErrorPage = nextUrl.pathname === "/auth-error";
+  const isPublicPage = isLoginPage || isErrorPage;
   const isApiAuthRoute = nextUrl.pathname.startsWith("/api/auth");
 
   // Allow Auth.js internal API calls
@@ -17,7 +19,7 @@ export default auth((req) => {
   }
 
   // 1. Unauthenticated users trying to access protected pages
-  if (!isLoggedIn && !isLoginPage) {
+  if (!isLoggedIn && !isPublicPage) {
     const loginUrl = new URL("/login", nextUrl.origin);
     return NextResponse.redirect(loginUrl);
   }
