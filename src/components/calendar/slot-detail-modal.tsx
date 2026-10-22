@@ -716,33 +716,20 @@ export function SlotDetailModal({
                   </div>
 
                   {isBooked && (
-                    <div className="flex items-center gap-2">
-                      <a
-                        href={googleCalendarUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-md border border-blue-600/60 text-blue-400 hover:bg-blue-950/40 hover:text-blue-300 text-xs font-medium transition-colors"
-                        title="Tambahkan ke Google Calendar"
-                      >
-                        <CalendarPlus className="h-3.5 w-3.5" />
-                        <span>Google Calendar</span>
-                        <ExternalLink className="h-3 w-3 opacity-70" />
-                      </a>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleUnassign}
-                        disabled={isPending}
-                        className="bg-transparent border-amber-600/60 text-amber-400 hover:bg-amber-950/40 hover:text-amber-300 text-xs flex items-center gap-1.5"
-                      >
-                        {isPending ? (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        ) : (
-                          <UserMinus className="h-3.5 w-3.5" />
-                        )}
-                        <span>Batalkan Booking</span>
-                      </Button>
-                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleUnassign}
+                      disabled={isPending}
+                      className="bg-transparent border-amber-600/60 text-amber-400 hover:bg-amber-950/40 hover:text-amber-300 text-xs flex items-center gap-1.5"
+                    >
+                      {isPending ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <UserMinus className="h-3.5 w-3.5" />
+                      )}
+                      <span>Batalkan Booking</span>
+                    </Button>
                   )}
                 </div>
               )}
@@ -792,21 +779,9 @@ export function SlotDetailModal({
                   )}
                 </Button>
               ) : isBookedByMe ? (
-                <div className="w-full space-y-2">
-                  <a
-                    href={googleCalendarUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full py-2.5 px-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs flex items-center justify-center gap-2 shadow transition-colors"
-                  >
-                    <CalendarPlus className="h-4 w-4" />
-                    <span>Tambahkan ke Google Calendar</span>
-                    <ExternalLink className="h-3.5 w-3.5 opacity-80" />
-                  </a>
-                  <div className="w-full py-1.5 rounded-lg bg-blue-950/40 border border-blue-800/40 text-center font-medium text-blue-300 text-[11px] flex items-center justify-center gap-1.5">
-                    <CalendarCheck className="h-3.5 w-3.5 text-blue-400" />
-                    <span>Jadwal Ini Telah Anda Daftarkan</span>
-                  </div>
+                <div className="w-full py-2 rounded-lg bg-blue-950/60 border border-blue-700/60 text-center font-medium text-blue-300 text-xs flex items-center justify-center gap-2">
+                  <CalendarCheck className="h-4 w-4 text-blue-400" />
+                  <span>Jadwal Ini Telah Anda Daftarkan</span>
                 </div>
               ) : (
                 <div className="w-full py-2 rounded-lg bg-[#2d2f31] border border-[#3c4043] text-center font-medium text-[#9aa0a6] text-xs flex items-center justify-center gap-2 cursor-not-allowed">
