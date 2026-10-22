@@ -38,21 +38,35 @@ export async function updateStudentProfile(
     };
   }
 
-  const rawData = {
-    fullName: formData.get("fullName"),
-    programStudi: formData.get("programStudi"),
-    kelas: formData.get("kelas"),
-  };
+  const isLecturer = session.user.role === "LECTURER";
 
-  const parsed = profileSchema.safeParse(rawData);
-  if (!parsed.success) {
-    return {
-      success: false,
-      error: parsed.error.errors[0]?.message || "Data profil tidak valid.",
-    };
+  let fullName = (formData.get("fullName") as string)?.trim() || "";
+  let programStudi: string | null = (formData.get("programStudi") as string)?.trim() || null;
+  let kelas: string | null = (formData.get("kelas") as string)?.trim() || null;
+
+  if (isLecturer) {
+    if (!fullName || fullName.length < 3) {
+      return {
+        success: false,
+        error: "Nama Lengkap Dosen minimal 3 karakter.",
+      };
+    }
+  } else {
+    const parsed = profileSchema.safeParse({
+      fullName,
+      programStudi,
+      kelas,
+    });
+    if (!parsed.success) {
+      return {
+        success: false,
+        error: parsed.error.errors[0]?.message || "Data profil tidak valid.",
+      };
+    }
+    fullName = parsed.data.fullName;
+    programStudi = parsed.data.programStudi;
+    kelas = parsed.data.kelas;
   }
-
-  const { fullName, programStudi, kelas } = parsed.data;
 
   try {
     await prisma.user.update({

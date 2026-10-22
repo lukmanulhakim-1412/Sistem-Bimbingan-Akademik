@@ -17,9 +17,10 @@ interface ProfileFormProps {
     programStudi: string;
     kelas: string;
   };
+  isLecturer?: boolean;
 }
 
-export function ProfileForm({ initialData }: ProfileFormProps) {
+export function ProfileForm({ initialData, isLecturer = false }: ProfileFormProps) {
   const router = useRouter();
   const { update } = useSession();
   const [isPending, startTransition] = useTransition();
@@ -77,60 +78,72 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
 
       <div className="space-y-1.5">
         <Label htmlFor="fullName" className="text-sm font-semibold text-white">
-          Nama Lengkap Mahasiswa
+          {isLecturer ? "Nama Lengkap & Gelar Dosen" : "Nama Lengkap Mahasiswa"}
         </Label>
         <Input
           id="fullName"
           name="fullName"
           type="text"
           defaultValue={initialData.fullName}
-          placeholder="Contoh: Muhammad Rizky Pratama"
+          placeholder={
+            isLecturer
+              ? "Contoh: Dr. Ir. Budi Santoso, M.Kom"
+              : "Contoh: Muhammad Rizky Pratama"
+          }
           required
           minLength={3}
           disabled={isPending}
           className="bg-[#2d2f31] border-[#5f6368] text-white focus-visible:ring-blue-500 h-11"
         />
         <p className="text-xs text-[#9aa0a6]">
-          Nama ini akan ditampilkan kepada Dosen saat Anda melakukan konsultasi.
+          {isLecturer
+            ? "Nama ini akan ditampilkan pada seluruh slot bimbingan kalender akademik."
+            : "Nama ini akan ditampilkan kepada Dosen saat Anda melakukan konsultasi."}
         </p>
       </div>
 
       <div className="space-y-1.5">
         <Label htmlFor="programStudi" className="text-sm font-semibold text-white">
-          Program Studi
+          {isLecturer ? "Fakultas / Departemen (Opsional)" : "Program Studi"}
         </Label>
         <Input
           id="programStudi"
           name="programStudi"
           type="text"
           defaultValue={initialData.programStudi}
-          placeholder="Contoh: Teknik Informatika"
-          required
-          minLength={2}
+          placeholder={
+            isLecturer
+              ? "Contoh: Fakultas Ilmu Komputer"
+              : "Contoh: Teknik Informatika"
+          }
+          required={!isLecturer}
+          minLength={isLecturer ? undefined : 2}
           disabled={isPending}
           className="bg-[#2d2f31] border-[#5f6368] text-white focus-visible:ring-blue-500 h-11"
         />
       </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="kelas" className="text-sm font-semibold text-white">
-          Kelas
-        </Label>
-        <Input
-          id="kelas"
-          name="kelas"
-          type="text"
-          defaultValue={initialData.kelas}
-          placeholder="Contoh: TI-3A, IF-42-01"
-          required
-          minLength={1}
-          disabled={isPending}
-          className="bg-[#2d2f31] border-[#5f6368] text-white focus-visible:ring-blue-500 h-11"
-        />
-        <p className="text-xs text-[#9aa0a6]">
-          Contoh format kelas: TI-3A, Reguler B, atau kode kelas prodi Anda.
-        </p>
-      </div>
+      {!isLecturer && (
+        <div className="space-y-1.5">
+          <Label htmlFor="kelas" className="text-sm font-semibold text-white">
+            Kelas
+          </Label>
+          <Input
+            id="kelas"
+            name="kelas"
+            type="text"
+            defaultValue={initialData.kelas}
+            placeholder="Contoh: TI-3A, IF-42-01"
+            required
+            minLength={1}
+            disabled={isPending}
+            className="bg-[#2d2f31] border-[#5f6368] text-white focus-visible:ring-blue-500 h-11"
+          />
+          <p className="text-xs text-[#9aa0a6]">
+            Contoh format kelas: TI-3A, Reguler B, atau kode kelas prodi Anda.
+          </p>
+        </div>
+      )}
 
       <div className="pt-4 border-t border-[#3c4043] flex items-center justify-between gap-3">
         <Link

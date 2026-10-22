@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { ProfileForm } from "@/components/profile-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, User, Mail, ShieldCheck, GraduationCap } from "lucide-react";
+import { ArrowLeft, User, Mail, ShieldCheck, GraduationCap, BookOpen } from "lucide-react";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -25,7 +25,9 @@ export default async function ProfilePage() {
     redirect("/login");
   }
 
-  if (dbUser.role === "STUDENT" && !dbUser.isOnboarded) {
+  const isLecturer = dbUser.role === "LECTURER";
+
+  if (!isLecturer && !dbUser.isOnboarded) {
     redirect("/onboarding");
   }
 
@@ -49,10 +51,14 @@ export default async function ProfilePage() {
           </Link>
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white text-sm">
-              <GraduationCap className="h-4 w-4" />
+              {isLecturer ? (
+                <BookOpen className="h-4 w-4" />
+              ) : (
+                <GraduationCap className="h-4 w-4" />
+              )}
             </div>
             <h1 className="text-base sm:text-lg font-semibold text-white">
-              Profil Mahasiswa
+              {isLecturer ? "Profil Dosen" : "Profil Mahasiswa"}
             </h1>
           </div>
         </div>
@@ -88,10 +94,10 @@ export default async function ProfilePage() {
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="text-base sm:text-lg font-bold text-white">
-                    {dbUser.name || "Akun Google"}
+                    {dbUser.fullName || dbUser.name || "Akun Google"}
                   </h2>
                   <Badge className="bg-blue-600/90 text-white text-[11px] font-medium border-0">
-                    {dbUser.role === "LECTURER" ? "Dosen" : "Mahasiswa"}
+                    {isLecturer ? "Dosen" : "Mahasiswa"}
                   </Badge>
                 </div>
                 <p className="text-xs text-[#9aa0a6] flex items-center gap-1.5 mt-0.5">
@@ -112,14 +118,18 @@ export default async function ProfilePage() {
         <Card className="bg-[#1e1f20] border-[#3c4043] text-[#e3e3e3] shadow-lg">
           <CardHeader className="border-b border-[#3c4043] pb-4">
             <CardTitle className="text-lg font-bold text-white">
-              Ubah Data Akademik Mahasiswa
+              {isLecturer
+                ? "Ubah Data Akun Dosen"
+                : "Ubah Data Akademik Mahasiswa"}
             </CardTitle>
             <CardDescription className="text-[#9aa0a6] text-xs">
-              Perbarui nama lengkap, program studi, atau kelas Anda. Perubahan ini akan langsung diperbarui pada seluruh slot jadwal bimbingan Anda.
+              {isLecturer
+                ? "Perbarui nama lengkap dan gelar Anda. Informasi ini akan ditampilkan pada sistem bimbingan mahasiswa."
+                : "Perbarui nama lengkap, program studi, atau kelas Anda. Perubahan ini akan langsung diperbarui pada seluruh slot jadwal bimbingan Anda."}
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
-            <ProfileForm initialData={initialData} />
+            <ProfileForm initialData={initialData} isLecturer={isLecturer} />
           </CardContent>
         </Card>
       </main>
