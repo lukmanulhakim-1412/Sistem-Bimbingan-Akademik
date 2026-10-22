@@ -17,27 +17,29 @@ export default async function DashboardPage() {
 
   const isLecturer = session.user.role === Role.LECTURER;
 
-  // 2. Authoritative check for students: verify onboarding in DB
-  if (!isLecturer) {
-    const dbUser = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: {
-        isOnboarded: true,
-        fullName: true,
-        programStudi: true,
-        kelas: true,
-      },
-    });
+  // 2. Fetch authoritative user profile from DB
+  const dbUser = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      isOnboarded: true,
+      fullName: true,
+      programStudi: true,
+      kelas: true,
+      image: true,
+    },
+  });
 
-    if (!dbUser?.isOnboarded) {
-      redirect("/onboarding");
-    }
+  if (!isLecturer && !dbUser?.isOnboarded) {
+    redirect("/onboarding");
+  }
 
-    // Attach latest DB values to session user
-    session.user.fullName = dbUser.fullName;
-    session.user.programStudi = dbUser.programStudi;
-    session.user.kelas = dbUser.kelas;
-    session.user.isOnboarded = true;
+  // Attach latest DB values to session user
+  if (dbUser) {
+    if (dbUser.fullName) session.user.fullName = dbUser.fullName;
+    if (dbUser.programStudi) session.user.programStudi = dbUser.programStudi;
+    if (dbUser.kelas) session.user.kelas = dbUser.kelas;
+    if (dbUser.image) session.user.image = dbUser.image;
+    if (!isLecturer) session.user.isOnboarded = true;
   }
 
   // Fetch all slots
@@ -74,6 +76,7 @@ export default async function DashboardPage() {
         id: session.user.id,
         name: session.user.name,
         email: session.user.email,
+        image: session.user.image,
         role: session.user.role,
         fullName: session.user.fullName,
         programStudi: session.user.programStudi,

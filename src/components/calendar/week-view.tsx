@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import {
   startOfWeek,
   addDays,
@@ -21,9 +21,9 @@ interface WeekViewProps {
   onCreateAtTime: (date: Date, hour: number) => void;
 }
 
-// Hours to display on the calendar grid (07:00 to 20:00)
-const START_HOUR = 7;
-const END_HOUR = 20;
+// Full 24-hour day coverage on the calendar grid (00:00 to 23:59)
+const START_HOUR = 0;
+const END_HOUR = 23;
 const HOUR_HEIGHT = 64; // px per hour
 
 export function WeekView({
@@ -34,6 +34,19 @@ export function WeekView({
   onCreateAtTime,
 }: WeekViewProps) {
   const isLecturer = user.role === Role.LECTURER;
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to daytime / current time on initial mount
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      const currentHour = new Date().getHours();
+      const targetHour = Math.max(
+        0,
+        Math.min(currentHour > 7 ? currentHour - 1 : 7, 18)
+      );
+      scrollContainerRef.current.scrollTop = targetHour * HOUR_HEIGHT;
+    }
+  }, []);
 
   // Calculate 7 days for the current week starting on Sunday
   const weekStart = useMemo(
@@ -54,17 +67,16 @@ export function WeekView({
   }, []);
 
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
-  const currentIndicatorTop = ((nowMinutes - START_HOUR * 60) / 60) * HOUR_HEIGHT;
-  const isNowWithinHours =
-    now.getHours() >= START_HOUR && now.getHours() <= END_HOUR;
+  const currentIndicatorTop = (nowMinutes / 60) * HOUR_HEIGHT;
+  const isNowWithinHours = true;
 
-  const hoursArray = Array.from(
-    { length: END_HOUR - START_HOUR + 1 },
-    (_, i) => START_HOUR + i
-  );
+  const hoursArray = Array.from({ length: 24 }, (_, i) => i);
 
   return (
-    <div className="flex-1 overflow-auto bg-[#131314] text-[#e3e3e3] select-none">
+    <div
+      ref={scrollContainerRef}
+      className="flex-1 overflow-auto bg-[#131314] text-[#e3e3e3] select-none"
+    >
       {/* Responsive Wrapper: Min-width on mobile allows smooth horizontal swipe, flex-1 on desktop */}
       <div className="min-w-[700px] md:min-w-0 md:w-full flex flex-col">
         {/* 1. Week Header Row (Sticky at Top) */}
@@ -114,8 +126,10 @@ export function WeekView({
           {/* Sticky Time Gutter Column */}
           <div className="w-14 sm:w-20 shrink-0 border-r border-[#3c4043] bg-[#18191b] sticky left-0 z-10 select-none text-[#9aa0a6]">
             {hoursArray.map((hour) => {
-              const period = hour >= 12 ? "PM" : "AM";
-              const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+              const nextHour = (hour + 1) % 24;
+              const period = nextHour >= 12 ? "PM" : "AM";
+              const displayHour =
+                nextHour > 12 ? nextHour - 12 : nextHour === 0 ? 12 : nextHour;
 
               return (
                 <div
