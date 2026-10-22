@@ -618,63 +618,98 @@ export function SlotDetailModal({
           {isLecturer ? (
             <div className="w-full space-y-2">
               {confirmDelete ? (
-                <div className="rounded-xl p-3 bg-red-950/40 border border-red-800/60 space-y-2.5">
-                  <div className="text-xs text-red-300 font-semibold flex items-center gap-1.5">
-                    <Trash2 className="h-4 w-4 text-red-400" />
-                    <span>Konfirmasi Penghapusan Jadwal:</span>
-                  </div>
-
+                <div className="rounded-xl p-3.5 bg-red-950/40 border border-red-800/60 shadow-lg animate-in fade-in duration-150">
                   {isRecurring ? (
-                    <div className="space-y-1.5">
-                      <p className="text-[11px] text-[#c4c7c5]">
-                        Jadwal ini berulang mingguan. Pilih cakupan penghapusan:
-                      </p>
-                      <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-xs font-semibold text-red-300 flex items-center gap-1.5">
+                          <Trash2 className="h-4 w-4 text-red-400 shrink-0" />
+                          <span>Hapus Jadwal Berulang</span>
+                        </p>
+                        <p className="text-[11px] text-[#c4c7c5] mt-1">
+                          Jadwal ini berulang mingguan. Silakan pilih cakupan jadwal yang ingin dihapus:
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <Button
-                          variant="destructive"
+                          type="button"
+                          variant="outline"
                           size="sm"
                           onClick={() => handleDelete(false)}
                           disabled={isPending}
-                          className="text-xs bg-red-700 hover:bg-red-800 flex-1"
+                          className="h-9 text-xs bg-red-950/40 hover:bg-red-900/60 text-red-200 border-red-800/80 hover:border-red-700 flex items-center justify-center gap-1.5 font-medium transition-colors"
                         >
-                          Hapus Hanya Slot Ini
+                          {isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                          <span>Hapus Hanya Slot Ini</span>
                         </Button>
                         <Button
+                          type="button"
                           variant="destructive"
                           size="sm"
                           onClick={() => handleDelete(true)}
                           disabled={isPending}
-                          className="text-xs bg-red-600 hover:bg-red-700 flex-1 font-semibold"
+                          className="h-9 text-xs bg-red-600 hover:bg-red-700 text-white font-semibold flex items-center justify-center gap-1.5 shadow"
                         >
-                          Hapus Ini & Semua Minggu Berikutnya
+                          {isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                          <span>Hapus Semua Minggu Berikutnya</span>
+                        </Button>
+                      </div>
+
+                      <div className="flex justify-end pt-0.5">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setConfirmDelete(false)}
+                          disabled={isPending}
+                          className="h-7 px-3 text-xs text-[#9aa0a6] hover:text-white hover:bg-[#3c4043]"
+                        >
+                          Batal
                         </Button>
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-center justify-end gap-2">
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDelete(false)}
-                        disabled={isPending}
-                        className="h-8 px-3 text-xs bg-red-600 hover:bg-red-700"
-                      >
-                        {isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Ya, Hapus Slot"}
-                      </Button>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-semibold text-red-300 flex items-center gap-1.5">
+                          <Trash2 className="h-4 w-4 text-red-400 shrink-0" />
+                          <span>Hapus Slot Jadwal Ini?</span>
+                        </p>
+                        <p className="text-[11px] text-[#c4c7c5] mt-0.5">
+                          Slot ini akan dihapus secara permanen dari kalender.
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2 justify-end shrink-0">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setConfirmDelete(false)}
+                          disabled={isPending}
+                          className="h-8 px-3 text-xs text-[#9aa0a6] hover:text-white hover:bg-[#3c4043]"
+                        >
+                          Batal
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDelete(false)}
+                          disabled={isPending}
+                          className="h-8 px-3.5 text-xs bg-red-600 hover:bg-red-700 text-white font-medium flex items-center gap-1.5 shadow"
+                        >
+                          {isPending ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-3.5 w-3.5" />
+                          )}
+                          <span>Ya, Hapus Slot</span>
+                        </Button>
+                      </div>
                     </div>
                   )}
-
-                  <div className="flex justify-end pt-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setConfirmDelete(false)}
-                      disabled={isPending}
-                      className="h-7 px-2 text-xs text-[#9aa0a6]"
-                    >
-                      Batal
-                    </Button>
-                  </div>
                 </div>
               ) : (
                 <div className="flex items-center justify-between gap-2 flex-wrap">
