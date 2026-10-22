@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, User, Mail, ShieldCheck, GraduationCap } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 
 export const dynamic = "force-dynamic";
 
@@ -73,12 +72,12 @@ export default async function ProfilePage() {
           <CardContent className="p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-4">
               {dbUser.image ? (
-                <Image
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
                   src={dbUser.image}
                   alt={dbUser.name || "Avatar"}
-                  width={56}
-                  height={56}
-                  className="rounded-full border-2 border-blue-500 shadow-md shrink-0"
+                  referrerPolicy="no-referrer"
+                  className="h-14 w-14 rounded-full border-2 border-blue-500 shadow-md object-cover shrink-0"
                 />
               ) : (
                 <div className="h-14 w-14 rounded-full bg-blue-900/60 border border-blue-500 flex items-center justify-center text-blue-300 font-bold text-xl shrink-0">
