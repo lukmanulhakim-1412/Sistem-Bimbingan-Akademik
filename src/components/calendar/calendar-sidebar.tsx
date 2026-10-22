@@ -15,6 +15,7 @@ interface CalendarSidebarProps {
   totalSlots: number;
   availableCount: number;
   bookedCount: number;
+  completedCount: number;
   onlineCount: number;
   offlineCount: number;
 }
@@ -29,6 +30,7 @@ export function CalendarSidebar({
   totalSlots,
   availableCount,
   bookedCount,
+  completedCount,
   onlineCount,
   offlineCount,
 }: CalendarSidebarProps) {
@@ -100,6 +102,36 @@ export function CalendarSidebar({
                 <span className="whitespace-nowrap">Slot Sudah Dibooking</span>
                 <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-950/60 text-blue-400 border border-blue-800/40 min-w-[20px] text-center ml-2">
                   {bookedCount}
+                </span>
+              </div>
+            </label>
+
+            {/* Completed Slots Filter */}
+            <label className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-[#2d2f31] cursor-pointer text-xs text-[#e3e3e3] transition-colors">
+              <input
+                type="checkbox"
+                checked={filters.showCompleted}
+                onChange={(e) =>
+                  onFilterChange({ ...filters, showCompleted: e.target.checked })
+                }
+                className="sr-only"
+              />
+              <div
+                className={`h-4 w-4 shrink-0 rounded flex items-center justify-center transition-colors border ${
+                  filters.showCompleted
+                    ? "bg-slate-600 border-slate-500 text-white"
+                    : "border-[#5f6368] bg-transparent"
+                }`}
+              >
+                {filters.showCompleted && <Check className="h-3 w-3 stroke-[3]" />}
+              </div>
+              <div className="flex-1 flex items-center justify-between gap-3 min-w-0">
+                <span className="flex items-center gap-1.5 whitespace-nowrap">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                  <span>Jadwal Selesai</span>
+                </span>
+                <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800/80 text-slate-300 border border-slate-700/60 min-w-[20px] text-center ml-2">
+                  {completedCount}
                 </span>
               </div>
             </label>
@@ -218,8 +250,12 @@ export function CalendarSidebar({
           <span className="font-semibold text-emerald-300">{availableCount}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-blue-400">Terisi:</span>
+          <span className="text-blue-400">Terisi (Aktif):</span>
           <span className="font-semibold text-blue-300">{bookedCount}</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-slate-400">Selesai:</span>
+          <span className="font-semibold text-slate-300">{completedCount}</span>
         </div>
         <div className="flex items-center justify-between pt-1 border-t border-[#3c4043]/40 text-[11px]">
           <span>Online / Offline:</span>

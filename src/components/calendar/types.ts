@@ -9,6 +9,7 @@ export type SlotWithBookedBy = Slot & {
 export interface CalendarFilters {
   showAvailable: boolean;
   showBooked: boolean;
+  showCompleted: boolean;
   showMyBookingsOnly: boolean;
   showOnline: boolean;
   showOffline: boolean;

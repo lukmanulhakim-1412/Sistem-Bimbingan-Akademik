@@ -52,6 +52,7 @@ export function GoogleCalendarDashboard({
   const [filters, setFilters] = useState<CalendarFilters>({
     showAvailable: true,
     showBooked: true,
+    showCompleted: true,
     showMyBookingsOnly: false,
     showOnline: true,
     showOffline: true,
@@ -69,25 +70,30 @@ export function GoogleCalendarDashboard({
   const [isWhitelistModalOpen, setIsWhitelistModalOpen] = useState(false);
 
   // KPI Calculations
+  const nowMs = Date.now();
   const totalSlots = initialSlots.length;
   const availableCount = initialSlots.filter(
-    (s) => s.bookedById === null && !s.isBlocked && new Date(s.startTime).getTime() > Date.now()
+    (s) => s.bookedById === null && !s.isBlocked && new Date(s.startTime).getTime() > nowMs
   ).length;
-  const bookedCount = initialSlots.filter((s) => s.bookedById !== null).length;
+  const bookedCount = initialSlots.filter(
+    (s) => s.bookedById !== null && new Date(s.endTime).getTime() > nowMs
+  ).length;
+  const completedCount = initialSlots.filter(
+    (s) => s.bookedById !== null && new Date(s.endTime).getTime() <= nowMs
+  ).length;
   const onlineCount = initialSlots.filter(
     (s) =>
       s.type === MeetingType.ONLINE &&
-      (s.bookedById !== null || new Date(s.startTime).getTime() > Date.now())
+      (s.bookedById !== null || new Date(s.startTime).getTime() > nowMs)
   ).length;
   const offlineCount = initialSlots.filter(
     (s) =>
       s.type === MeetingType.OFFLINE &&
-      (s.bookedById !== null || new Date(s.startTime).getTime() > Date.now())
+      (s.bookedById !== null || new Date(s.startTime).getTime() > nowMs)
   ).length;
 
   // Filtered Slots
   const filteredSlots = useMemo(() => {
-    const nowMs = Date.now();
     return initialSlots.filter((slot) => {
       const isBooked = slot.bookedById !== null;
       const isBlocked = slot.isBlocked;
@@ -98,8 +104,13 @@ export function GoogleCalendarDashboard({
       // Exclude expired unbooked slots from the view
       if (isExpired) return false;
 
+      const endMs = new Date(slot.endTime).getTime();
+      const isCompleted = isBooked && nowMs >= endMs;
+      const isActiveBooked = isBooked && nowMs < endMs;
+
       if (!filters.showAvailable && isAvailable) return false;
-      if (!filters.showBooked && isBooked) return false;
+      if (!filters.showBooked && isActiveBooked) return false;
+      if (!filters.showCompleted && isCompleted) return false;
       if (filters.showMyBookingsOnly && !isBookedByMe) return false;
 
       const isOnline = slot.type === MeetingType.ONLINE;
@@ -110,7 +121,7 @@ export function GoogleCalendarDashboard({
 
       return true;
     });
-  }, [initialSlots, filters, user.id]);
+  }, [initialSlots, filters, user.id, nowMs]);
 
   // Navigation handlers
   const handlePrev = () => {
@@ -177,6 +188,7 @@ export function GoogleCalendarDashboard({
               totalSlots={totalSlots}
               availableCount={availableCount}
               bookedCount={bookedCount}
+              completedCount={completedCount}
               onlineCount={onlineCount}
               offlineCount={offlineCount}
             />
@@ -221,6 +233,7 @@ export function GoogleCalendarDashboard({
                   totalSlots={totalSlots}
                   availableCount={availableCount}
                   bookedCount={bookedCount}
+                  completedCount={completedCount}
                   onlineCount={onlineCount}
                   offlineCount={offlineCount}
                 />
