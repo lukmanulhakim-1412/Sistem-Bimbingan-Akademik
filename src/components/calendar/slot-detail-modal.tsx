@@ -712,21 +712,21 @@ export function SlotDetailModal({
                   )}
                 </div>
               ) : (
-                <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setConfirmDelete(true)}
-                      disabled={isPending}
-                      className="bg-transparent border-[#5f6368] text-red-400 hover:bg-red-950/40 hover:text-red-300 text-xs flex items-center gap-1.5"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                      <span>Hapus Slot</span>
-                    </Button>
+                <div className="flex items-center justify-between gap-3 flex-wrap w-full">
+                  {!isBooked ? (
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setConfirmDelete(true)}
+                        disabled={isPending}
+                        className="bg-transparent border-[#5f6368] text-red-400 hover:bg-red-950/40 hover:text-red-300 text-xs flex items-center gap-1.5"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        <span>Hapus Slot</span>
+                      </Button>
 
-                    {/* Quick Toggle Block/Unblock for Lecturer */}
-                    {!isBooked && (
+                      {/* Quick Toggle Block/Unblock for Lecturer */}
                       <Button
                         variant="outline"
                         size="sm"
@@ -747,24 +747,27 @@ export function SlotDetailModal({
                         )}
                         <span>{isBlocked ? "Buka Blokir (Jadikan Tersedia)" : "Blokir Waktu Ini"}</span>
                       </Button>
-                    )}
-                  </div>
-
-                  {isBooked && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleUnassign}
-                      disabled={isPending}
-                      className="bg-transparent border-amber-600/60 text-amber-400 hover:bg-amber-950/40 hover:text-amber-300 text-xs flex items-center gap-1.5"
-                    >
-                      {isPending ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        <UserMinus className="h-3.5 w-3.5" />
-                      )}
-                      <span>Batalkan Booking</span>
-                    </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between gap-2.5 w-full">
+                      <p className="text-[11px] text-[#9aa0a6] italic leading-tight">
+                        Slot sudah dibooking. Batalkan booking terlebih dahulu untuk menghapus slot.
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleUnassign}
+                        disabled={isPending}
+                        className="bg-transparent border-amber-600/60 text-amber-400 hover:bg-amber-950/40 hover:text-amber-300 text-xs flex items-center gap-1.5 shrink-0"
+                      >
+                        {isPending ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <UserMinus className="h-3.5 w-3.5" />
+                        )}
+                        <span>Batalkan Booking</span>
+                      </Button>
+                    </div>
                   )}
                 </div>
               )}

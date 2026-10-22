@@ -460,7 +460,12 @@ export async function deleteSlot(
   try {
     const targetSlot = await prisma.slot.findUnique({
       where: { id: slotId },
-      select: { id: true, recurringGroupId: true, startTime: true },
+      select: {
+        id: true,
+        recurringGroupId: true,
+        startTime: true,
+        bookedById: true,
+      },
     });
 
     if (!targetSlot) {
@@ -470,7 +475,34 @@ export async function deleteSlot(
       };
     }
 
+    // Guardrail: Do not allow direct deletion if the slot is currently booked by a student
+    if (targetSlot.bookedById) {
+      return {
+        success: false,
+        error:
+          "Jadwal yang sudah dibooking oleh mahasiswa tidak dapat langsung dihapus. Silakan batalkan booking terlebih dahulu.",
+      };
+    }
+
     if (deleteFollowing && targetSlot.recurringGroupId) {
+      // Guardrail: Ensure no subsequent slots in this recurring series are booked
+      const hasBookedFollowing = await prisma.slot.findFirst({
+        where: {
+          recurringGroupId: targetSlot.recurringGroupId,
+          startTime: { gte: targetSlot.startTime },
+          bookedById: { not: null },
+        },
+        select: { id: true },
+      });
+
+      if (hasBookedFollowing) {
+        return {
+          success: false,
+          error:
+            "Tidak dapat menghapus seluruh rangkaian: Terdapat jadwal pada minggu berikutnya yang sudah dibooking mahasiswa. Silakan batalkan booking pada jadwal terkait terlebih dahulu.",
+        };
+      }
+
       const deleted = await prisma.slot.deleteMany({
         where: {
           recurringGroupId: targetSlot.recurringGroupId,
