@@ -8,6 +8,7 @@ import {
   isToday,
   format,
 } from "date-fns";
+import { id } from "date-fns/locale";
 import { SlotWithBookedBy, UserSessionInfo } from "./types";
 import { Role, MeetingType } from "@prisma/client";
 import { formatTime } from "@/lib/utils";
@@ -81,8 +82,8 @@ export function WeekView({
       <div className="min-w-[700px] md:min-w-0 md:w-full flex flex-col">
         {/* 1. Week Header Row (Sticky at Top) */}
         <div className="flex border-b border-[#3c4043] bg-[#1e1f20] shrink-0 sticky top-0 z-20">
-          {/* Timezone label (Sticky top-left intersection) */}
-          <div className="w-14 sm:w-20 shrink-0 border-r border-[#3c4043] flex flex-col items-center justify-end pb-2 text-[10px] sm:text-xs text-[#9aa0a6] font-medium sticky left-0 z-30 bg-[#1e1f20]">
+          {/* Timezone label (Sticky top-left intersection - centered in box) */}
+          <div className="w-14 sm:w-20 shrink-0 border-r border-[#3c4043] flex items-center justify-center text-[10px] sm:text-xs text-[#9aa0a6] font-medium sticky left-0 z-30 bg-[#1e1f20]">
             <span>GMT+07</span>
           </div>
 
@@ -90,7 +91,7 @@ export function WeekView({
           <div className="flex-1 grid grid-cols-7 divide-x divide-[#3c4043]">
             {weekDays.map((day, idx) => {
               const today = isToday(day);
-              const dayName = format(day, "EEE").toUpperCase();
+              const dayName = format(day, "EEE", { locale: id }).toUpperCase();
               const dayNum = day.getDate();
 
               return (
@@ -135,10 +136,10 @@ export function WeekView({
                 <div
                   key={hour}
                   style={{ height: `${HOUR_HEIGHT}px` }}
-                  className="border-b border-[#2d2f31] relative pr-1.5 sm:pr-2 flex items-start justify-end text-[10px] sm:text-[11px] font-medium"
+                  className="border-b border-[#2d2f31] relative flex items-start text-[10px] sm:text-[11px] font-medium"
                 >
-                  {/* Time label sitting centered on the hour dividing line */}
-                  <span className="absolute -bottom-2.5 right-1.5 sm:right-2 bg-[#18191b] px-0.5 sm:px-1 leading-none text-[#9aa0a6] z-10">
+                  {/* Time label sitting centered on the hour dividing line and horizontally centered */}
+                  <span className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 bg-[#18191b] px-1 sm:px-1.5 leading-none text-[#9aa0a6] z-10 whitespace-nowrap">
                     {displayHour} {period}
                   </span>
                 </div>
