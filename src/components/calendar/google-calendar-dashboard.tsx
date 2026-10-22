@@ -108,10 +108,17 @@ export function GoogleCalendarDashboard({
       const isCompleted = isBooked && nowMs >= endMs;
       const isActiveBooked = isBooked && nowMs < endMs;
 
-      if (!filters.showAvailable && isAvailable) return false;
-      if (!filters.showBooked && isActiveBooked) return false;
-      if (!filters.showCompleted && isCompleted) return false;
+      // If student checks "Hanya Jadwal Saya", only slots booked by the current user should be shown
       if (filters.showMyBookingsOnly && !isBookedByMe) return false;
+
+      if (!filters.showAvailable && isAvailable) return false;
+
+      // For active booked slots: if showMyBookingsOnly is active and slot is booked by me, keep it visible
+      if (!filters.showBooked && isActiveBooked && !filters.showMyBookingsOnly) {
+        return false;
+      }
+
+      if (!filters.showCompleted && isCompleted) return false;
 
       const isOnline = slot.type === MeetingType.ONLINE;
       const isOffline = slot.type === MeetingType.OFFLINE;
