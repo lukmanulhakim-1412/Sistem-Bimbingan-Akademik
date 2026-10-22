@@ -12,7 +12,7 @@ import { id } from "date-fns/locale";
 import { SlotWithBookedBy, UserSessionInfo } from "./types";
 import { Role, MeetingType } from "@prisma/client";
 import { formatTime, getWIBParts, isSameDayWIB, isTodayWIB } from "@/lib/utils";
-import { Video, MapPin, Lock, User, Plus, Ban, Repeat, Clock, CheckCircle2 } from "lucide-react";
+import { Video, MapPin, Lock, User, Plus, Ban, Repeat, Clock, CheckCircle2, FileText } from "lucide-react";
 
 interface WeekViewProps {
   currentDate: Date;
@@ -295,10 +295,19 @@ export function WeekView({
                                 ? "Online"
                                 : "Tatap Muka"}
                             </span>
-                            {isLecturer && slot.recurringGroupId && (
-                              <span title="Berulang Mingguan" className="ml-auto flex items-center">
-                                <Repeat className="h-2.5 w-2.5 shrink-0 text-blue-300" />
-                              </span>
+                            {isLecturer && (
+                              <div className="ml-auto flex items-center gap-1">
+                                {slot.lecturerNotes && (
+                                  <span title="Memiliki Catatan Dosen (Privat)" className="flex items-center text-amber-300">
+                                    <FileText className="h-2.5 w-2.5 shrink-0" />
+                                  </span>
+                                )}
+                                {slot.recurringGroupId && (
+                                  <span title="Berulang Mingguan" className="flex items-center text-blue-300">
+                                    <Repeat className="h-2.5 w-2.5 shrink-0" />
+                                  </span>
+                                )}
+                              </div>
                             )}
                           </div>
 

@@ -9,6 +9,7 @@ import {
   deleteSlot,
   updateSlotLocation,
   toggleSlotBlock,
+  updateLecturerNotes,
 } from "@/actions/slot-actions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -34,6 +35,7 @@ import {
   Ban,
   ShieldCheck,
   CheckCircle2,
+  FileText,
 } from "lucide-react";
 
 interface SlotDetailModalProps {
@@ -59,11 +61,19 @@ export function SlotDetailModal({
   const [locationInput, setLocationInput] = useState("");
   const [currentLocation, setCurrentLocation] = useState("");
 
+  // Editable Lecturer Notes state (private to Lecturer, max 280 chars)
+  const [isEditingNotes, setIsEditingNotes] = useState(false);
+  const [notesInput, setNotesInput] = useState("");
+  const [currentLecturerNotes, setCurrentLecturerNotes] = useState<string | null>(null);
+
   useEffect(() => {
     if (slot) {
       setLocationInput(slot.locationDetails || "");
       setCurrentLocation(slot.locationDetails || "");
       setIsEditingLocation(false);
+      setNotesInput(slot.lecturerNotes || "");
+      setCurrentLecturerNotes(slot.lecturerNotes || null);
+      setIsEditingNotes(false);
       setErrorMessage(null);
       setSuccessMessage(null);
       setConfirmDelete(false);
@@ -97,6 +107,22 @@ export function SlotDetailModal({
         setCurrentLocation(locationInput);
         setSuccessMessage(res.message || "Tautan pertemuan berhasil disimpan!");
         setIsEditingLocation(false);
+      }
+    });
+  };
+
+  const handleSaveNotes = () => {
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    startTransition(async () => {
+      const res = await updateLecturerNotes(slot.id, notesInput);
+      if (!res.success) {
+        setErrorMessage(res.error || "Gagal menyimpan catatan dosen.");
+      } else {
+        setCurrentLecturerNotes(notesInput.trim() || null);
+        setSuccessMessage(res.message || "Catatan dosen berhasil disimpan!");
+        setIsEditingNotes(false);
       }
     });
   };
@@ -418,6 +444,98 @@ export function SlotDetailModal({
                   </span>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Lecturer View: Private Notes on Booked Slot (Max 280 chars, visible exclusively to lecturers) */}
+          {isLecturer && isBooked && (
+            <div className="p-3.5 rounded-lg bg-amber-950/20 border border-amber-800/50 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-amber-300 font-bold uppercase tracking-wider text-[11px]">
+                  <FileText className="h-4 w-4 text-amber-400" />
+                  <span>Catatan Dosen</span>
+                  <span className="text-[10px] text-[#9aa0a6] font-normal lowercase">(hanya terlihat oleh dosen)</span>
+                </div>
+
+                {!isEditingNotes && (
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingNotes(true)}
+                    className="text-amber-400 hover:text-amber-300 text-xs font-semibold flex items-center gap-1 hover:underline transition-colors"
+                  >
+                    <Edit2 className="h-3 w-3" />
+                    <span>{currentLecturerNotes ? "Ubah Catatan" : "Tambah Catatan"}</span>
+                  </button>
+                )}
+              </div>
+
+              {isEditingNotes ? (
+                <div className="space-y-2 pt-1">
+                  <div className="space-y-1">
+                    <textarea
+                      value={notesInput}
+                      onChange={(e) => setNotesInput(e.target.value.slice(0, 280))}
+                      placeholder="Tulis catatan evaluasi, topik bimbingan, atau persiapan untuk mahasiswa ini (maks 280 karakter)..."
+                      rows={3}
+                      disabled={isPending}
+                      maxLength={280}
+                      className="w-full text-xs rounded-lg p-2.5 bg-[#18191b] border border-[#5f6368] text-white placeholder:text-[#80868b] focus:outline-none focus:ring-1 focus:ring-amber-500 transition-colors resize-none"
+                    />
+                    <div className="flex justify-between items-center text-[10px] px-1 text-[#9aa0a6]">
+                      <span>Maksimal 280 karakter</span>
+                      <span
+                        className={
+                          notesInput.length >= 260
+                            ? "text-amber-400 font-bold"
+                            : "text-[#9aa0a6]"
+                        }
+                      >
+                        {notesInput.length} / 280
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 justify-end">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        setNotesInput(currentLecturerNotes || "");
+                        setIsEditingNotes(false);
+                      }}
+                      disabled={isPending}
+                      className="h-7 text-xs text-[#9aa0a6]"
+                    >
+                      Batal
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={handleSaveNotes}
+                      disabled={isPending}
+                      className="h-7 text-xs bg-amber-600 hover:bg-amber-700 text-white font-medium"
+                    >
+                      {isPending ? (
+                        <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                      ) : (
+                        <Check className="h-3 w-3 mr-1" />
+                      )}
+                      <span>Simpan Catatan</span>
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  {currentLecturerNotes ? (
+                    <p className="text-white text-xs leading-relaxed whitespace-pre-wrap break-words bg-[#18191b]/80 p-2.5 rounded border border-[#3c4043]">
+                      {currentLecturerNotes}
+                    </p>
+                  ) : (
+                    <p className="italic text-[#9aa0a6] text-xs">
+                      Belum ada catatan. Klik &apos;Tambah Catatan&apos; untuk menulis catatan khusus mahasiswa ini.
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           )}
 

@@ -83,6 +83,7 @@ model Slot {
   bookedById       String?
   bookedBy         User?        @relation("BookedSlots", fields: [bookedById], references: [id], onDelete: SetNull)
   bookedAt         DateTime?
+  lecturerNotes    String?
   createdAt        DateTime     @default(now())
 
   @@index([startTime])

@@ -23,7 +23,7 @@ import { StudentWhitelistModal } from "./student-whitelist-modal";
 import { Role, MeetingType } from "@prisma/client";
 import { formatDate, formatTimeRange, getWIBDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Video, MapPin, Clock, Inbox, UserCheck, X, Ban, Repeat, CheckCircle2 } from "lucide-react";
+import { Video, MapPin, Clock, Inbox, UserCheck, X, Ban, Repeat, CheckCircle2, FileText } from "lucide-react";
 
 interface GoogleCalendarDashboardProps {
   initialSlots: SlotWithBookedBy[];
@@ -299,6 +299,13 @@ export function GoogleCalendarDashboard({
                                 <Badge className="bg-blue-950 text-blue-300 border border-blue-800 text-[10px] sm:text-[11px] flex items-center gap-1">
                                   <Repeat className="h-3 w-3" />
                                   <span>Mingguan</span>
+                                </Badge>
+                              )}
+
+                              {isLecturer && slot.lecturerNotes && (
+                                <Badge className="bg-amber-950/80 text-amber-300 border border-amber-800 text-[10px] sm:text-[11px] flex items-center gap-1 max-w-[260px] truncate">
+                                  <FileText className="h-3 w-3 shrink-0" />
+                                  <span className="truncate">Catatan: {slot.lecturerNotes}</span>
                                 </Badge>
                               )}
 

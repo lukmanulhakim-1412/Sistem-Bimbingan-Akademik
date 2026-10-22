@@ -524,3 +524,72 @@ export async function toggleSlotBlock(
     };
   }
 }
+
+/**
+ * Update private lecturer notes on a booked slot (LECTURER ONLY)
+ * Max 280 characters. Visible exclusively to lecturers.
+ */
+export async function updateLecturerNotes(
+  slotId: string,
+  notes: string
+): Promise<ActionResponse> {
+  const session = await auth();
+
+  if (!session?.user?.id || session.user.role !== Role.LECTURER) {
+    return {
+      success: false,
+      error: "Akses ditolak: Hanya Dosen yang memiliki hak untuk menambahkan catatan.",
+    };
+  }
+
+  if (!slotId) {
+    return { success: false, error: "ID Slot jadwal tidak valid." };
+  }
+
+  const trimmedNotes = notes?.trim() || "";
+  if (trimmedNotes.length > 280) {
+    return {
+      success: false,
+      error: "Catatan maksimal 280 karakter.",
+    };
+  }
+
+  try {
+    const slot = await prisma.slot.findUnique({
+      where: { id: slotId },
+      select: { id: true, bookedById: true },
+    });
+
+    if (!slot) {
+      return { success: false, error: "Slot tidak ditemukan." };
+    }
+
+    if (!slot.bookedById) {
+      return {
+        success: false,
+        error: "Catatan hanya dapat ditambahkan pada jadwal yang sudah dibooking oleh mahasiswa.",
+      };
+    }
+
+    await prisma.slot.update({
+      where: { id: slotId },
+      data: {
+        lecturerNotes: trimmedNotes.length > 0 ? trimmedNotes : null,
+      },
+    });
+
+    revalidatePath("/");
+    return {
+      success: true,
+      message: trimmedNotes.length > 0
+        ? "Catatan dosen berhasil disimpan."
+        : "Catatan dosen berhasil dihapus.",
+    };
+  } catch (err) {
+    console.error("Gagal menyimpan catatan dosen:", err);
+    return {
+      success: false,
+      error: "Gagal menyimpan catatan dosen.",
+    };
+  }
+}

@@ -101,11 +101,12 @@ export default async function DashboardPage() {
     },
   });
 
-  // Privacy protection: sanitize other students' data when viewed by a student
+  // Privacy protection: sanitize other students' data and private lecturer notes
   const slots = isLecturer
     ? allSlots
     : allSlots.map((s) => ({
         ...s,
+        lecturerNotes: null,
         bookedBy: s.bookedById === session.user.id ? s.bookedBy : null,
       }));
 
