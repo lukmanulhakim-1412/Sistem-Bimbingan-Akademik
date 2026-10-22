@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { MeetingType, Role } from "@prisma/client";
+import { formatDate, formatTimeRange } from "@/lib/utils";
 
 const createSlotSchema = z.object({
   date: z.string().min(1, "Tanggal harus dipilih"),
@@ -12,9 +13,15 @@ const createSlotSchema = z.object({
   type: z.nativeEnum(MeetingType, {
     errorMap: () => ({ message: "Jenis pertemuan tidak valid" }),
   }).default(MeetingType.ONLINE),
-  locationDetails: z.string().optional(),
+  locationDetails: z
+    .string()
+    .max(300, "Tautan / lokasi maksimal 300 karakter")
+    .optional(),
   isBlocked: z.boolean().optional(),
-  blockReason: z.string().optional(),
+  blockReason: z
+    .string()
+    .max(150, "Alasan blokir maksimal 150 karakter")
+    .optional(),
   repeatWeekly: z.boolean().optional(),
   repeatWeeksCount: z.number().min(2).max(24).optional().default(12),
 });
@@ -107,6 +114,35 @@ export async function createSlot(formData: FormData): Promise<ActionResponse> {
   }
 
   try {
+    // 1. Overlap Prevention: Check for any conflicting schedule in database
+    const conflictingSlot = await prisma.slot.findFirst({
+      where: {
+        OR: slotsToCreate.map((s) => ({
+          startTime: { lt: s.endTime },
+          endTime: { gt: s.startTime },
+        })),
+      },
+      select: {
+        startTime: true,
+        endTime: true,
+        isBlocked: true,
+        blockReason: true,
+      },
+    });
+
+    if (conflictingSlot) {
+      const formattedDate = formatDate(conflictingSlot.startTime);
+      const formattedRange = formatTimeRange(
+        conflictingSlot.startTime,
+        conflictingSlot.endTime
+      );
+      return {
+        success: false,
+        error: `Gagal membuat jadwal: Waktu bentrok dengan jadwal lain yang sudah terdaftar pada ${formattedDate} (${formattedRange}).`,
+      };
+    }
+
+    // 2. Insert new non-overlapping slots
     await prisma.slot.createMany({
       data: slotsToCreate,
     });
@@ -149,6 +185,13 @@ export async function updateSlotLocation(
     return {
       success: false,
       error: "ID Slot jadwal tidak valid.",
+    };
+  }
+
+  if (locationDetails && locationDetails.length > 300) {
+    return {
+      success: false,
+      error: "Tautan / lokasi maksimal 300 karakter.",
     };
   }
 
@@ -199,6 +242,21 @@ export async function bookSlot(slotId: string): Promise<ActionResponse> {
     return {
       success: false,
       error: "Anda harus melengkapi profil onboarding sebelum melakukan booking.",
+    };
+  }
+
+  // Active Whitelist Guard: Verify student is currently authorized by Lecturer
+  const studentEmail = session.user.email?.toLowerCase().trim() || "";
+  const isWhitelisted = await prisma.allowedStudent.findUnique({
+    where: { email: studentEmail },
+    select: { id: true },
+  });
+
+  if (!isWhitelisted) {
+    return {
+      success: false,
+      error:
+        "Akses ditolak: Akun Anda tidak lagi terdaftar dalam daftar mahasiswa bimbingan yang diizinkan.",
     };
   }
 

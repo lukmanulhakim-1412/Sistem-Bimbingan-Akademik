@@ -88,6 +88,8 @@ model Slot {
   @@index([startTime])
   @@index([bookedById])
   @@index([recurringGroupId])
+  @@index([startTime, isBlocked])
+  @@index([bookedById, startTime])
 }
 
 model AllowedStudent {
