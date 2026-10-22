@@ -115,13 +115,21 @@ export function MonthView({
                     const isBooked = !!slot.bookedById;
                     const isBookedByMe = slot.bookedById === user.id;
                     const isBlocked = !!slot.isBlocked;
-                    const isCompleted = isBooked && new Date(slot.startTime).getTime() <= Date.now();
+                    const nowMs = Date.now();
+                    const startMs = new Date(slot.startTime).getTime();
+                    const endMs = new Date(slot.endTime).getTime();
+                    const isOngoing = isBooked && nowMs >= startMs && nowMs < endMs;
+                    const isCompleted = isBooked && nowMs >= endMs;
 
                     let pillColor =
                       "bg-emerald-950/80 border border-emerald-600 text-emerald-300";
                     if (isBlocked) {
                       pillColor =
                         "bg-amber-950/80 border border-amber-600 text-amber-300";
+                    } else if (isOngoing) {
+                      pillColor = isBookedByMe || isLecturer
+                        ? "bg-sky-950/90 border border-sky-500 text-sky-200 ring-1 ring-sky-400/40"
+                        : "bg-sky-950/70 border border-sky-600 text-sky-300";
                     } else if (isCompleted) {
                       pillColor = isBookedByMe || isLecturer
                         ? "bg-slate-900/90 border border-slate-600 text-slate-300"
@@ -156,6 +164,12 @@ export function MonthView({
                         <span className="truncate">
                           {isBlocked
                             ? slot.blockReason || (isLecturer ? "Diblokir" : "Tidak Tersedia")
+                            : isOngoing
+                            ? isLecturer
+                              ? `${slot.bookedBy?.fullName || "Mahasiswa"} • Berlangsung`
+                              : isBookedByMe
+                              ? "Berlangsung (Jadwal Anda)"
+                              : "Berlangsung"
                             : isCompleted
                             ? isLecturer
                               ? `${slot.bookedBy?.fullName || "Selesai"} • Selesai`

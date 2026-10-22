@@ -219,13 +219,21 @@ export function WeekView({
                     const isBooked = !!slot.bookedById;
                     const isBookedByMe = slot.bookedById === user.id;
                     const isBlocked = !!slot.isBlocked;
-                    const isCompleted = isBooked && new Date(slot.startTime).getTime() <= Date.now();
+                    const nowMs = Date.now();
+                    const startMs = new Date(slot.startTime).getTime();
+                    const endMs = new Date(slot.endTime).getTime();
+                    const isOngoing = isBooked && nowMs >= startMs && nowMs < endMs;
+                    const isCompleted = isBooked && nowMs >= endMs;
 
                     // Google Calendar Card Theme Styles
                     let cardStyles = "";
                     if (isBlocked) {
                       cardStyles =
                         "bg-[#322314] border-l-4 border-l-amber-500 border border-amber-600/40 text-amber-200 hover:bg-[#3d2c1a]";
+                    } else if (isOngoing) {
+                      cardStyles = isBookedByMe || isLecturer
+                        ? "bg-[#102d45] border-l-4 border-l-sky-400 border border-sky-500/60 text-sky-100 hover:bg-[#153957] shadow-lg shadow-sky-950/40 ring-1 ring-sky-400/40"
+                        : "bg-[#192b3a] border-l-4 border-l-sky-500 border border-sky-600/40 text-sky-200 opacity-90 hover:opacity-100";
                     } else if (isCompleted) {
                       cardStyles = isBookedByMe || isLecturer
                         ? "bg-[#182533] border-l-4 border-l-slate-400 border border-slate-700/60 text-slate-300 hover:bg-[#1e2f42]"
@@ -263,6 +271,12 @@ export function WeekView({
                           <div className="flex items-center gap-1 font-semibold text-[11px] leading-tight truncate">
                             {isBlocked ? (
                               <Ban className="h-3 w-3 shrink-0 text-amber-400" />
+                            ) : isOngoing ? (
+                              slot.type === MeetingType.ONLINE ? (
+                                <Video className="h-3 w-3 shrink-0 text-sky-300" />
+                              ) : (
+                                <MapPin className="h-3 w-3 shrink-0 text-sky-300" />
+                              )
                             ) : isCompleted ? (
                               slot.type === MeetingType.ONLINE ? (
                                 <Video className="h-3 w-3 shrink-0 text-slate-400" />
@@ -301,6 +315,27 @@ export function WeekView({
                               <Ban className="h-2.5 w-2.5 shrink-0" />
                               <span>{isLecturer ? "Diblokir (Dosen)" : "Tidak Tersedia"}</span>
                             </span>
+                          ) : isOngoing ? (
+                            isLecturer ? (
+                              <span className="flex items-center gap-1 font-semibold text-sky-300">
+                                <span className="h-1.5 w-1.5 rounded-full bg-sky-400 animate-pulse shrink-0" />
+                                <span className="truncate">
+                                  {slot.bookedBy?.fullName ||
+                                    slot.bookedBy?.name ||
+                                    "Mahasiswa"} (Sedang Berlangsung)
+                                </span>
+                              </span>
+                            ) : isBookedByMe ? (
+                              <span className="flex items-center gap-1 font-semibold text-sky-300">
+                                <span className="h-1.5 w-1.5 rounded-full bg-sky-400 animate-pulse shrink-0" />
+                                <span className="truncate">Sedang Berlangsung (Jadwal Anda)</span>
+                              </span>
+                            ) : (
+                              <span className="flex items-center gap-1 font-medium text-sky-300">
+                                <span className="h-1.5 w-1.5 rounded-full bg-sky-400 animate-pulse shrink-0" />
+                                <span>Sedang Berlangsung</span>
+                              </span>
+                            )
                           ) : isCompleted ? (
                             isLecturer ? (
                               <span className="flex items-center gap-1 font-medium text-slate-300">

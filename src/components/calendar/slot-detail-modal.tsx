@@ -77,8 +77,12 @@ export function SlotDetailModal({
   const isBookedByMe = slot.bookedById === user.id;
   const isBlocked = !!slot.isBlocked;
   const isRecurring = !!slot.recurringGroupId;
-  const isPast = new Date(slot.startTime) <= new Date();
-  const isCompleted = isBooked && isPast;
+  const nowMs = Date.now();
+  const startMs = new Date(slot.startTime).getTime();
+  const endMs = new Date(slot.endTime).getTime();
+  const isPast = nowMs >= startMs;
+  const isOngoing = isBooked && nowMs >= startMs && nowMs < endMs;
+  const isCompleted = isBooked && nowMs >= endMs;
   const student = slot.bookedBy;
 
   const handleSaveLocation = () => {
@@ -195,6 +199,15 @@ export function SlotDetailModal({
                     <CheckCircle2 className="h-3.5 w-3.5 text-blue-400" />
                     <span>
                       {isBookedByMe ? "Selesai (Jadwal Anda)" : "Selesai"}
+                    </span>
+                  </Badge>
+                ) : isOngoing ? (
+                  <Badge className="bg-sky-950 text-sky-200 border border-sky-600 font-medium text-xs flex items-center gap-1.5 animate-pulse">
+                    <span className="h-1.5 w-1.5 rounded-full bg-sky-400" />
+                    <span>
+                      {isBookedByMe
+                        ? "Sedang Berlangsung (Jadwal Anda)"
+                        : "Sedang Berlangsung"}
                     </span>
                   </Badge>
                 ) : isBooked ? (
@@ -556,6 +569,15 @@ export function SlotDetailModal({
                     {isBookedByMe
                       ? "Sesi Konsultasi Anda Telah Selesai"
                       : "Sesi Konsultasi Telah Selesai"}
+                  </span>
+                </div>
+              ) : isOngoing ? (
+                <div className="w-full py-2.5 rounded-lg bg-sky-950/60 border border-sky-700/60 text-center font-medium text-sky-200 text-xs flex items-center justify-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-sky-400 animate-pulse" />
+                  <span>
+                    {isBookedByMe
+                      ? "Sesi Konsultasi Anda Sedang Berlangsung"
+                      : "Sesi Konsultasi Sedang Berlangsung"}
                   </span>
                 </div>
               ) : !isBooked ? (

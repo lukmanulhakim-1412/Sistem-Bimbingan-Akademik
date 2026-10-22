@@ -254,7 +254,11 @@ export function GoogleCalendarDashboard({
                     {filteredSlots.map((slot) => {
                       const isBooked = !!slot.bookedById;
                       const isBookedByMe = slot.bookedById === user.id;
-                      const isCompleted = isBooked && new Date(slot.startTime).getTime() <= Date.now();
+                      const nowMs = Date.now();
+                      const startMs = new Date(slot.startTime).getTime();
+                      const endMs = new Date(slot.endTime).getTime();
+                      const isOngoing = isBooked && nowMs >= startMs && nowMs < endMs;
+                      const isCompleted = isBooked && nowMs >= endMs;
 
                       return (
                         <div
@@ -301,6 +305,15 @@ export function GoogleCalendarDashboard({
                               {slot.isBlocked ? (
                                 <Badge className="bg-amber-700/80 text-white text-[10px] sm:text-[11px]">
                                   {isLecturer ? "Diblokir Dosen" : "Tidak Tersedia"}
+                                </Badge>
+                              ) : isOngoing ? (
+                                <Badge className="bg-sky-950 text-sky-200 border border-sky-600 text-[10px] sm:text-[11px] flex items-center gap-1.5 animate-pulse">
+                                  <span className="h-1.5 w-1.5 rounded-full bg-sky-400" />
+                                  <span>
+                                    {isBookedByMe
+                                      ? "Sedang Berlangsung (Jadwal Anda)"
+                                      : "Sedang Berlangsung"}
+                                  </span>
                                 </Badge>
                               ) : isCompleted ? (
                                 <Badge className="bg-slate-800 text-slate-300 border border-slate-600 text-[10px] sm:text-[11px] flex items-center gap-1">
