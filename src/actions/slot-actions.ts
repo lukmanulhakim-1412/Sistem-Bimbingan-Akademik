@@ -215,9 +215,8 @@ export async function bookSlot(slotId: string): Promise<ActionResponse> {
     const result = await prisma.slot.updateMany({
       where: {
         id: slotId,
-        bookedById: null, // Atomic lock condition
+        bookedById: null, // Atomic lock condition: must not be booked yet
         isBlocked: false, // Cannot book blocked slots
-        startTime: { gt: new Date() }, // Prevent booking past slots
       },
       data: {
         bookedById: session.user.id,
@@ -226,9 +225,35 @@ export async function bookSlot(slotId: string): Promise<ActionResponse> {
     });
 
     if (result.count === 0) {
+      const existing = await prisma.slot.findUnique({
+        where: { id: slotId },
+        select: { bookedById: true, isBlocked: true },
+      });
+
+      if (!existing) {
+        return {
+          success: false,
+          error: "Slot jadwal tidak ditemukan atau telah dihapus.",
+        };
+      }
+
+      if (existing.isBlocked) {
+        return {
+          success: false,
+          error: "Maaf, slot jadwal ini sedang diblokir oleh Dosen.",
+        };
+      }
+
+      if (existing.bookedById) {
+        return {
+          success: false,
+          error: "Maaf, slot jadwal ini baru saja dibooking oleh mahasiswa lain.",
+        };
+      }
+
       return {
         success: false,
-        error: "Maaf, slot jadwal ini baru saja dibooking oleh mahasiswa lain atau sudah kedaluwarsa.",
+        error: "Gagal memproses booking slot. Silakan coba kembali.",
       };
     }
 
