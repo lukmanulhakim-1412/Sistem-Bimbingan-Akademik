@@ -29,8 +29,23 @@ export interface WhitelistActionResponse {
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+interface RawWhitelistedStudent {
+  id: string;
+  email: string;
+  name: string | null;
+  notes: string | null;
+  createdAt: Date | string;
+  userId: string | null;
+  userName: string | null;
+  userFullName: string | null;
+  programStudi: string | null;
+  kelas: string | null;
+  isOnboarded: boolean | null;
+}
+
 /**
  * Fetch all whitelisted students (LECTURER ONLY)
+ * Optimized into a single database round-trip via SQL LEFT JOIN.
  */
 export async function getWhitelistedStudents(): Promise<{
   success: boolean;
@@ -47,50 +62,42 @@ export async function getWhitelistedStudents(): Promise<{
   }
 
   try {
-    const allowed = await prisma.allowedStudent.findMany({
-      orderBy: { createdAt: "desc" },
-    });
+    const rawStudents = await prisma.$queryRaw<RawWhitelistedStudent[]>`
+      SELECT 
+        a.id,
+        a.email,
+        a.name,
+        a.notes,
+        a."createdAt",
+        u.id AS "userId",
+        u.name AS "userName",
+        u."fullName" AS "userFullName",
+        u."programStudi",
+        u.kelas,
+        u."isOnboarded"
+      FROM "AllowedStudent" a
+      LEFT JOIN "User" u ON LOWER(a.email) = LOWER(u.email)
+      ORDER BY a."createdAt" DESC
+    `;
 
-    if (allowed.length === 0) {
-      return { success: true, students: [] };
-    }
-
-    const emails = allowed.map((a) => a.email.toLowerCase());
-
-    const registeredUsers = await prisma.user.findMany({
-      where: {
-        email: { in: emails },
-      },
-      select: {
-        email: true,
-        name: true,
-        fullName: true,
-        programStudi: true,
-        kelas: true,
-        isOnboarded: true,
-      },
-    });
-
-    const userMap = new Map<string, (typeof registeredUsers)[0]>();
-    for (const u of registeredUsers) {
-      userMap.set(u.email.toLowerCase(), u);
-    }
-
-    const students: WhitelistStudentItem[] = allowed.map((item) => {
-      const regUser = userMap.get(item.email.toLowerCase());
+    const students: WhitelistStudentItem[] = rawStudents.map((row) => {
+      const isRegistered = Boolean(row.userId);
       return {
-        id: item.id,
-        email: item.email,
-        name: item.name,
-        notes: item.notes,
-        createdAt: item.createdAt.toISOString(),
-        isRegistered: !!regUser,
-        registeredUser: regUser
+        id: row.id,
+        email: row.email,
+        name: row.name,
+        notes: row.notes,
+        createdAt:
+          row.createdAt instanceof Date
+            ? row.createdAt.toISOString()
+            : new Date(row.createdAt).toISOString(),
+        isRegistered,
+        registeredUser: isRegistered
           ? {
-              fullName: regUser.fullName || regUser.name,
-              programStudi: regUser.programStudi,
-              kelas: regUser.kelas,
-              isOnboarded: regUser.isOnboarded,
+              fullName: row.userFullName || row.userName,
+              programStudi: row.programStudi,
+              kelas: row.kelas,
+              isOnboarded: Boolean(row.isOnboarded),
             }
           : null,
       };
