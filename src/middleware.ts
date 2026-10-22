@@ -17,7 +17,7 @@ export default auth((req) => {
   // Rate Limiting for Authentication (10 requests / minute per client IP)
   if (isApiAuthRoute || isLoginPage) {
     const clientIp = extractClientIp(req.headers);
-    const rateCheck = checkRateLimit(`auth:${clientIp}`, 10, 60);
+    const rateCheck = checkRateLimit(`auth:${clientIp}`, 60, 60);
 
     if (!rateCheck.success) {
       if (isApiAuthRoute) {
