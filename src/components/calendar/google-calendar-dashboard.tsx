@@ -140,7 +140,7 @@ export function GoogleCalendarDashboard({
       <div className="flex-1 flex overflow-hidden relative">
         {/* Desktop Sidebar (inline) */}
         {isSidebarOpen && (
-          <div className="hidden lg:flex flex-col shrink-0 w-64 h-full min-h-full bg-[#1e1f20] border-r border-[#3c4043] overflow-hidden">
+          <div className="hidden lg:flex flex-col shrink-0 w-[272px] h-full min-h-full bg-[#1e1f20] border-r border-[#3c4043] overflow-hidden">
             <CalendarSidebar
               currentDate={currentDate}
               onSelectDate={(d) => setCurrentDate(d)}

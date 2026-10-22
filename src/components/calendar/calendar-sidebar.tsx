@@ -55,7 +55,7 @@ export function CalendarSidebar({
               className="sr-only"
             />
             <div
-              className={`h-4 w-4 rounded flex items-center justify-center transition-colors border ${
+              className={`h-4 w-4 shrink-0 rounded flex items-center justify-center transition-colors border ${
                 filters.showAvailable
                   ? "bg-emerald-600 border-emerald-500 text-white"
                   : "border-[#5f6368] bg-transparent"
@@ -63,9 +63,9 @@ export function CalendarSidebar({
             >
               {filters.showAvailable && <Check className="h-3 w-3 stroke-[3]" />}
             </div>
-            <div className="flex-1 flex items-center justify-between">
-              <span>Slot Tersedia</span>
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-800/40">
+            <div className="flex-1 flex items-center justify-between gap-3 min-w-0">
+              <span className="whitespace-nowrap">Slot Tersedia</span>
+              <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-800/40 min-w-[20px] text-center ml-2">
                 {availableCount}
               </span>
             </div>
@@ -82,7 +82,7 @@ export function CalendarSidebar({
               className="sr-only"
             />
             <div
-              className={`h-4 w-4 rounded flex items-center justify-center transition-colors border ${
+              className={`h-4 w-4 shrink-0 rounded flex items-center justify-center transition-colors border ${
                 filters.showBooked
                   ? "bg-blue-600 border-blue-500 text-white"
                   : "border-[#5f6368] bg-transparent"
@@ -90,9 +90,9 @@ export function CalendarSidebar({
             >
               {filters.showBooked && <Check className="h-3 w-3 stroke-[3]" />}
             </div>
-            <div className="flex-1 flex items-center justify-between">
-              <span>Slot Sudah Dibooking</span>
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-blue-950/60 text-blue-400 border border-blue-800/40">
+            <div className="flex-1 flex items-center justify-between gap-3 min-w-0">
+              <span className="whitespace-nowrap">Slot Sudah Dibooking</span>
+              <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-950/60 text-blue-400 border border-blue-800/40 min-w-[20px] text-center ml-2">
                 {bookedCount}
               </span>
             </div>
@@ -113,7 +113,7 @@ export function CalendarSidebar({
                 className="sr-only"
               />
               <div
-                className={`h-4 w-4 rounded flex items-center justify-center transition-colors border ${
+                className={`h-4 w-4 shrink-0 rounded flex items-center justify-center transition-colors border ${
                   filters.showMyBookingsOnly
                     ? "bg-indigo-600 border-indigo-500 text-white"
                     : "border-[#5f6368] bg-transparent"
