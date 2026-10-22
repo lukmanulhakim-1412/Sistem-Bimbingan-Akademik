@@ -19,6 +19,7 @@ import { WeekView } from "./week-view";
 import { MonthView } from "./month-view";
 import { CreateSlotModal } from "./create-slot-modal";
 import { SlotDetailModal } from "./slot-detail-modal";
+import { StudentWhitelistModal } from "./student-whitelist-modal";
 import { Role, MeetingType } from "@prisma/client";
 import { formatDate, formatTimeRange } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -61,6 +62,9 @@ export function GoogleCalendarDashboard({
 
   const [selectedSlot, setSelectedSlot] = useState<SlotWithBookedBy | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+  // Student Whitelist Modal State (Lecturer only)
+  const [isWhitelistModalOpen, setIsWhitelistModalOpen] = useState(false);
 
   // KPI Calculations
   const totalSlots = initialSlots.length;
@@ -127,6 +131,9 @@ export function GoogleCalendarDashboard({
         isSidebarOpen={isSidebarOpen}
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         user={user}
+        onOpenWhitelistModal={
+          isLecturer ? () => setIsWhitelistModalOpen(true) : undefined
+        }
       />
 
       {/* 2. Main Body: Sidebar + Active Viewport */}
@@ -141,6 +148,9 @@ export function GoogleCalendarDashboard({
               onFilterChange={setFilters}
               user={user}
               onOpenCreateModal={() => handleOpenCreateModal()}
+              onOpenWhitelistModal={
+                isLecturer ? () => setIsWhitelistModalOpen(true) : undefined
+              }
               totalSlots={totalSlots}
               availableCount={availableCount}
               bookedCount={bookedCount}
@@ -183,6 +193,14 @@ export function GoogleCalendarDashboard({
                     handleOpenCreateModal();
                     setIsSidebarOpen(false);
                   }}
+                  onOpenWhitelistModal={
+                    isLecturer
+                      ? () => {
+                          setIsWhitelistModalOpen(true);
+                          setIsSidebarOpen(false);
+                        }
+                      : undefined
+                  }
                   totalSlots={totalSlots}
                   availableCount={availableCount}
                   bookedCount={bookedCount}
@@ -336,6 +354,14 @@ export function GoogleCalendarDashboard({
         }}
         user={user}
       />
+
+      {/* 5. Student Whitelist Management Modal (Lecturer only) */}
+      {isLecturer && (
+        <StudentWhitelistModal
+          isOpen={isWhitelistModalOpen}
+          onClose={() => setIsWhitelistModalOpen(false)}
+        />
+      )}
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import { Role } from "@prisma/client";
 import { MiniCalendar } from "./mini-calendar";
 import { CalendarFilters, UserSessionInfo } from "./types";
-import { Plus, Check, Calendar, CheckCircle2, Clock } from "lucide-react";
+import { Plus, Check, Calendar, CheckCircle2, Clock, Users } from "lucide-react";
 
 interface CalendarSidebarProps {
   currentDate: Date;
@@ -12,6 +12,7 @@ interface CalendarSidebarProps {
   onFilterChange: (filters: CalendarFilters) => void;
   user: UserSessionInfo;
   onOpenCreateModal: () => void;
+  onOpenWhitelistModal?: () => void;
   totalSlots: number;
   availableCount: number;
   bookedCount: number;
@@ -24,6 +25,7 @@ export function CalendarSidebar({
   onFilterChange,
   user,
   onOpenCreateModal,
+  onOpenWhitelistModal,
   totalSlots,
   availableCount,
   bookedCount,
@@ -32,13 +34,13 @@ export function CalendarSidebar({
 
   return (
     <aside className="w-64 shrink-0 bg-[#1e1f20] border-r border-[#3c4043] flex flex-col p-4 gap-6 select-none overflow-y-auto">
-      {/* Create Slot Button (Prominent Google Calendar style for Lecturers) */}
+      {/* Create Slot & Whitelist Buttons for Lecturers */}
       {isLecturer ? (
-        <div>
+        <div className="space-y-2.5">
           <button
             type="button"
             onClick={onOpenCreateModal}
-            className="h-12 px-6 rounded-full bg-[#303134] hover:bg-[#3c4043] border border-[#5f6368] hover:shadow-lg transition-all flex items-center gap-3 text-white font-medium shadow-md text-sm group active:scale-[0.98]"
+            className="w-full h-12 px-5 rounded-full bg-[#303134] hover:bg-[#3c4043] border border-[#5f6368] hover:shadow-lg transition-all flex items-center gap-3 text-white font-medium shadow-md text-sm group active:scale-[0.98]"
           >
             {/* Google colored plus icon */}
             <div className="relative flex items-center justify-center">
@@ -46,6 +48,18 @@ export function CalendarSidebar({
             </div>
             <span>Buat Slot Baru</span>
           </button>
+
+          {onOpenWhitelistModal && (
+            <button
+              type="button"
+              onClick={onOpenWhitelistModal}
+              className="w-full h-9 px-3 rounded-xl bg-[#282a2d] hover:bg-[#3c4043] border border-[#3c4043] text-xs font-medium text-[#c4c7c5] hover:text-white transition-all flex items-center justify-center gap-2 shadow-sm"
+              title="Kelola daftar email mahasiswa bimbingan yang diizinkan masuk"
+            >
+              <Users className="h-4 w-4 text-emerald-400" />
+              <span>Daftar Mahasiswa (Whitelist)</span>
+            </button>
+          )}
         </div>
       ) : (
         <div className="bg-[#2d2f31] border border-[#3c4043] rounded-xl p-3.5 text-xs text-[#c4c7c5] space-y-2.5">

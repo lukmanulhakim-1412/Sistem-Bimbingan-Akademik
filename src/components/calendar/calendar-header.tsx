@@ -12,6 +12,7 @@ import {
   ChevronDown,
   BookOpen,
   User,
+  Users,
 } from "lucide-react";
 
 interface CalendarHeaderProps {
@@ -24,6 +25,7 @@ interface CalendarHeaderProps {
   isSidebarOpen: boolean;
   onToggleSidebar: () => void;
   user: UserSessionInfo;
+  onOpenWhitelistModal?: () => void;
 }
 
 export function CalendarHeader({
@@ -36,6 +38,7 @@ export function CalendarHeader({
   isSidebarOpen,
   onToggleSidebar,
   user,
+  onOpenWhitelistModal,
 }: CalendarHeaderProps) {
   const isLecturer = user.role === Role.LECTURER;
   const currentDayNum = new Date().getDate();
@@ -141,6 +144,19 @@ export function CalendarHeader({
           </select>
           <ChevronDown className="h-3.5 w-3.5 absolute right-2 top-2.5 sm:top-3 pointer-events-none text-[#9aa0a6]" />
         </div>
+
+        {/* Whitelist Management Button for Lecturer */}
+        {isLecturer && onOpenWhitelistModal && (
+          <button
+            type="button"
+            onClick={onOpenWhitelistModal}
+            className="h-8 sm:h-9 px-2 sm:px-3 rounded-md bg-[#2d2f31] hover:bg-[#3c4043] border border-[#5f6368] text-xs font-medium text-white transition-colors flex items-center gap-1.5 shrink-0"
+            title="Kelola Daftar Mahasiswa Bimbingan (Whitelist)"
+          >
+            <Users className="h-3.5 w-3.5 text-emerald-400" />
+            <span className="hidden sm:inline">Mahasiswa</span>
+          </button>
+        )}
 
         {/* Profile Link for Students */}
         {!isLecturer && (

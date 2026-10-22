@@ -33,6 +33,33 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
     },
   },
   callbacks: {
+    async signIn({ user }) {
+      if (!user.email) return false;
+      const email = user.email.trim().toLowerCase();
+
+      // 1. Dosen selalu diizinkan masuk
+      if (isLecturerEmail(email)) {
+        return true;
+      }
+
+      // 2. Mahasiswa wajib terdaftar dalam daftar whitelist (AllowedStudent)
+      try {
+        const allowed = await prisma.allowedStudent.findUnique({
+          where: { email },
+        });
+
+        if (allowed) {
+          return true;
+        }
+
+        console.warn(`[AUTH] Akses ditolak untuk ${email}: Belum terdaftar di whitelist.`);
+        return false;
+      } catch (err) {
+        console.error("[AUTH] Gagal memeriksa whitelist:", err);
+        return false;
+      }
+    },
+
     async jwt({ token, user, trigger, session }) {
       if (user) {
         // Initial sign-in: retrieve current DB record or sync lecturer role

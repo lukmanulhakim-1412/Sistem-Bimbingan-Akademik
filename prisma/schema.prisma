@@ -85,3 +85,15 @@ model Slot {
   @@index([startTime])
   @@index([bookedById])
 }
+
+model AllowedStudent {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+}
+
