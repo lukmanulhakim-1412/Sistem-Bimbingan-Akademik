@@ -16,6 +16,7 @@ export interface UserSessionInfo {
   id: string;
   name?: string | null;
   email?: string | null;
+  image?: string | null;
   role: Role;
   fullName?: string | null;
   programStudi?: string | null;

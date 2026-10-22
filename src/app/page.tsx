@@ -26,6 +26,7 @@ export default async function DashboardPage() {
         fullName: true,
         programStudi: true,
         kelas: true,
+        image: true,
       },
     });
 
@@ -37,6 +38,7 @@ export default async function DashboardPage() {
     session.user.fullName = dbUser.fullName;
     session.user.programStudi = dbUser.programStudi;
     session.user.kelas = dbUser.kelas;
+    session.user.image = dbUser.image || session.user.image;
     session.user.isOnboarded = true;
   }
 
@@ -74,6 +76,7 @@ export default async function DashboardPage() {
         id: session.user.id,
         name: session.user.name,
         email: session.user.email,
+        image: session.user.image,
         role: session.user.role,
         fullName: session.user.fullName,
         programStudi: session.user.programStudi,
