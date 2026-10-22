@@ -115,6 +115,51 @@ export async function createSlot(formData: FormData): Promise<ActionResponse> {
 }
 
 /**
+ * Update slot's meeting link or location details (LECTURER ONLY)
+ */
+export async function updateSlotLocation(
+  slotId: string,
+  locationDetails: string
+): Promise<ActionResponse> {
+  const session = await auth();
+
+  if (!session?.user?.id || session.user.role !== Role.LECTURER) {
+    return {
+      success: false,
+      error: "Akses ditolak: Hanya Dosen yang berhak mengubah tautan pertemuan.",
+    };
+  }
+
+  if (!slotId) {
+    return {
+      success: false,
+      error: "ID Slot jadwal tidak valid.",
+    };
+  }
+
+  try {
+    await prisma.slot.update({
+      where: { id: slotId },
+      data: {
+        locationDetails: locationDetails.trim() || null,
+      },
+    });
+
+    revalidatePath("/");
+    return {
+      success: true,
+      message: "Tautan pertemuan berhasil diperbarui!",
+    };
+  } catch (err) {
+    console.error("Gagal mengubah tautan slot:", err);
+    return {
+      success: false,
+      error: "Gagal menyimpan perubahan tautan pertemuan.",
+    };
+  }
+}
+
+/**
  * Book an available slot (STUDENT ONLY & MUST BE ONBOARDED)
  * Uses atomic conditional updateMany to prevent race conditions.
  */

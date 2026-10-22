@@ -1,9 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { Navbar } from "@/components/navbar";
-import { LecturerDashboard } from "@/components/lecturer-dashboard";
-import { StudentDashboard } from "@/components/student-dashboard";
+import { GoogleCalendarDashboard } from "@/components/calendar/google-calendar-dashboard";
 import { Role } from "@prisma/client";
 
 // Ensure fresh data on every page load
@@ -42,75 +40,45 @@ export default async function DashboardPage() {
     session.user.isOnboarded = true;
   }
 
-  if (isLecturer) {
-    // Fetch all slots for lecturer view (including student relations)
-    const slots = await prisma.slot.findMany({
-      orderBy: {
-        startTime: "asc",
-      },
-      include: {
-        bookedBy: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            fullName: true,
-            programStudi: true,
-            kelas: true,
-          },
+  // Fetch all slots
+  const allSlots = await prisma.slot.findMany({
+    orderBy: {
+      startTime: "asc",
+    },
+    include: {
+      bookedBy: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          fullName: true,
+          programStudi: true,
+          kelas: true,
         },
       },
-    });
-
-    return (
-      <div className="min-h-screen bg-slate-50 flex flex-col">
-        <Navbar user={session.user} />
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-8 sm:px-6 lg:px-8">
-          <LecturerDashboard slots={slots} />
-        </main>
-        <footer className="border-t border-slate-200 py-6 text-center text-xs text-slate-400 bg-white">
-          Sistem Penjadwalan Bimbingan Akademik • Dikelola oleh Dosen Universitas
-        </footer>
-      </div>
-    );
-  }
-
-  // Student View:
-  // Fetch slots booked by the current student
-  const myBookings = await prisma.slot.findMany({
-    where: {
-      bookedById: session.user.id,
-    },
-    orderBy: {
-      startTime: "asc",
     },
   });
 
-  // Fetch all upcoming slots (not in the past)
-  const upcomingSlots = await prisma.slot.findMany({
-    where: {
-      endTime: {
-        gte: new Date(),
-      },
-    },
-    orderBy: {
-      startTime: "asc",
-    },
-  });
+  // Privacy protection: sanitize other students' data when viewed by a student
+  const slots = isLecturer
+    ? allSlots
+    : allSlots.map((s) => ({
+        ...s,
+        bookedBy: s.bookedById === session.user.id ? s.bookedBy : null,
+      }));
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <Navbar user={session.user} />
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <StudentDashboard
-          currentUserId={session.user.id}
-          myBookings={myBookings}
-          upcomingSlots={upcomingSlots}
-        />
-      </main>
-      <footer className="border-t border-slate-200 py-6 text-center text-xs text-slate-400 bg-white">
-        Sistem Penjadwalan Bimbingan Akademik Mahasiswa • Terhubung Otomatis ke Cloud Serverless
-      </footer>
-    </div>
+    <GoogleCalendarDashboard
+      initialSlots={slots}
+      user={{
+        id: session.user.id,
+        name: session.user.name,
+        email: session.user.email,
+        role: session.user.role,
+        fullName: session.user.fullName,
+        programStudi: session.user.programStudi,
+        kelas: session.user.kelas,
+      }}
+    />
   );
 }

@@ -2,9 +2,15 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, ShieldCheck, CalendarCheck, Clock } from "lucide-react";
+import { GraduationCap, ShieldCheck, CalendarCheck, Clock, AlertTriangle } from "lucide-react";
 
-export default async function LoginPage() {
+interface LoginPageProps {
+  searchParams?: {
+    error?: string;
+  };
+}
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
   const session = await auth();
 
   if (session?.user) {
@@ -13,6 +19,8 @@ export default async function LoginPage() {
     }
     redirect("/");
   }
+
+  const error = searchParams?.error;
 
   return (
     <main className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-b from-slate-50 via-blue-50/30 to-slate-100 p-4 sm:p-6">
@@ -34,10 +42,29 @@ export default async function LoginPage() {
           <CardHeader className="space-y-1 text-center pb-4">
             <CardTitle className="text-xl">Masuk ke Portal</CardTitle>
             <CardDescription>
-              Gunakan akun Google universitas Anda untuk melanjutkan.
+              Gunakan akun Google universitas atau akun yang terdaftar untuk melanjutkan.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Error Notification Banner if AccessDenied / Whitelist blocked */}
+            {error && (
+              <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-900 text-xs sm:text-sm flex items-start gap-3 shadow-sm animate-in fade-in">
+                <AlertTriangle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <p className="font-bold text-red-800">
+                    {error === "AccessDenied"
+                      ? "Akses Masuk Ditolak"
+                      : "Terjadi Kendala Autentikasi"}
+                  </p>
+                  <p className="text-red-700 text-xs leading-relaxed">
+                    {error === "AccessDenied"
+                      ? "Email Google Anda belum terdaftar dalam daftar mahasiswa bimbingan yang diizinkan oleh Dosen. Silakan hubungi Dosen Anda untuk menambahkan email Anda."
+                      : "Gagal memproses autentikasi. Silakan coba kembali."}
+                  </p>
+                </div>
+              </div>
+            )}
+
             <GoogleSignInButton />
 
             <div className="relative">
