@@ -48,14 +48,20 @@ export function CalendarSidebar({
           </button>
         </div>
       ) : (
-        <div className="bg-[#2d2f31] border border-[#3c4043] rounded-xl p-3 text-xs text-[#c4c7c5]">
-          <p className="font-semibold text-white flex items-center gap-1.5 mb-1">
+        <div className="bg-[#2d2f31] border border-[#3c4043] rounded-xl p-3.5 text-xs text-[#c4c7c5] space-y-2.5">
+          <p className="font-semibold text-white flex items-center gap-1.5">
             <Clock className="h-3.5 w-3.5 text-blue-400" />
             <span>Portal Mahasiswa</span>
           </p>
           <p className="text-[11px] text-[#9aa0a6] leading-relaxed">
             Pilih slot konsultasi yang berstatus <span className="text-emerald-400 font-medium">Tersedia</span> pada kalender untuk mengajukan bimbingan.
           </p>
+          <a
+            href="/profile"
+            className="inline-flex items-center justify-center gap-1.5 w-full py-1.5 px-3 rounded-lg bg-[#3c4043] hover:bg-[#5f6368]/60 text-white font-medium text-xs transition-colors border border-[#5f6368]/50"
+          >
+            <span>Ubah Profil (Nama/Kelas)</span>
+          </a>
         </div>
       )}
 

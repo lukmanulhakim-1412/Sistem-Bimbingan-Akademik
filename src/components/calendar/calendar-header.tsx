@@ -4,12 +4,14 @@ import { Role } from "@prisma/client";
 import { CalendarViewMode, UserSessionInfo } from "./types";
 import { LogoutButton } from "@/components/logout-button";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 import {
   ChevronLeft,
   ChevronRight,
   Menu,
   ChevronDown,
   BookOpen,
+  User,
 } from "lucide-react";
 
 interface CalendarHeaderProps {
@@ -113,7 +115,7 @@ export function CalendarHeader({
           </button>
         </div>
 
-        {/* Month & Year Display (Responsive: Short on mobile, full on desktop) */}
+        {/* Month & Year Display */}
         <div className="truncate pl-0.5 sm:pl-1">
           <span className="text-xs sm:text-base md:text-lg font-semibold tracking-tight text-white capitalize hidden sm:inline">
             {fullMonthYear}
@@ -124,8 +126,8 @@ export function CalendarHeader({
         </div>
       </div>
 
-      {/* Right section: View Switcher, Role Badge, Logout */}
-      <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+      {/* Right section: View Switcher, Profile Button, Role Badge, Logout */}
+      <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
         {/* View Mode Selector (Week / Month / List) */}
         <div className="relative">
           <select
@@ -139,6 +141,18 @@ export function CalendarHeader({
           </select>
           <ChevronDown className="h-3.5 w-3.5 absolute right-2 top-2.5 sm:top-3 pointer-events-none text-[#9aa0a6]" />
         </div>
+
+        {/* Profile Link for Students */}
+        {!isLecturer && (
+          <Link
+            href="/profile"
+            className="h-8 sm:h-9 px-2 sm:px-3 rounded-md bg-[#2d2f31] hover:bg-[#3c4043] border border-[#5f6368] text-xs font-medium text-white transition-colors flex items-center gap-1.5 shrink-0"
+            title="Ubah Profil Mahasiswa (Nama, Prodi, Kelas)"
+          >
+            <User className="h-3.5 w-3.5 text-blue-400" />
+            <span className="hidden sm:inline">Profil</span>
+          </Link>
+        )}
 
         {/* Role Badge (Desktop only) */}
         <div className="hidden lg:block">
